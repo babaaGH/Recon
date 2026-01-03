@@ -1,0 +1,395 @@
+@import "tailwindcss";
+
+/* ========== 2026 FINTECH HARDENING ========== */
+/* Mixed Pairing System: Inter (UI) + JetBrains Mono (Data) */
+/* OLED Black optimized for extended usage and professional clarity */
+
+:root {
+  /* ========== 2026 FINTECH PALETTE ========== */
+  /* OLED Black Background - True #000000 for premium displays */
+  --bg-primary: #000000;        /* Pure OLED black - main background */
+  --bg-surface: rgba(26, 26, 26, 0.6);  /* Semi-transparent surface for glass effect */
+  --bg-elevated: #1a1a1a;       /* Elevated cards and surfaces */
+  --bg-secondary: rgba(0, 0, 0, 0.4);   /* Secondary backgrounds */
+
+  /* Typography: Anti-halation colors for OLED */
+  --text-primary: #E0E0E0;      /* Off-White - prevents halation on OLED */
+  --text-secondary: #888888;    /* Gray - labels and meta information */
+  --text-muted: #64748b;        /* Muted - tertiary information */
+
+  /* Borders: Glassmorphic with interaction states */
+  --border-glass: rgba(51, 51, 51, 0.5);     /* Subtle glass borders */
+  --border-glass-hover: rgba(0, 122, 255, 0.5);  /* Apple Blue on hover */
+  --border-primary: #333333;    /* Solid border for separation */
+  --border-slate: rgba(51, 51, 51, 0.5);    /* Legacy compatibility */
+
+  /* ========== FINTECH ACCENT SYSTEM ========== */
+  --accent-apple-blue: #007AFF; /* Apple Blue - primary interactions */
+  --accent-cyan: #10b981;       /* Green - positive growth, success */
+  --accent-amber: #fb923c;      /* Amber - warnings, caution */
+  --accent-indigo: #6366f1;     /* Indigo - AI-generated content */
+  --accent-primary: #4a9eff;    /* Legacy blue - links, CTAs */
+
+  /* ========== STATE INDICATORS ========== */
+  --status-healthy: #10b981;    /* Green */
+  --status-warning: #fb923c;    /* Amber */
+  --status-critical: #ef4444;   /* Red */
+  --status-ai: #6366f1;         /* Indigo */
+
+  /* State backgrounds with subtle glow */
+  --glow-cyan: rgba(16, 185, 129, 0.15);
+  --glow-amber: rgba(251, 146, 60, 0.15);
+  --glow-indigo: rgba(99, 102, 241, 0.15);
+  --glow-red: rgba(239, 68, 68, 0.15);
+
+  /* ========== LEGACY COMPATIBILITY ========== */
+  --dark-slate: #1a1a1a;
+  --state-positive: var(--accent-cyan);
+  --state-warning: var(--accent-amber);
+  --state-critical: #ef4444;
+  --state-info: var(--accent-indigo);
+  --success-bg: var(--glow-cyan);
+  --warning-bg: var(--glow-amber);
+  --error-bg: var(--glow-red);
+  --info-bg: var(--glow-indigo);
+  --link-default: var(--accent-apple-blue);
+  --link-visited: var(--accent-indigo);
+
+  /* ========== TYPOGRAPHY SYSTEM ========== */
+  /* Mixed Pairing: Inter for UI, JetBrains Mono for Data */
+  --font-ui: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-data: var(--font-jetbrains-mono), 'IBM Plex Mono', 'Courier New', monospace;
+
+  --font-header: 600;           /* Semi-bold for section headers */
+  --font-body: 400;             /* Regular for body text */
+  --font-label: 500;            /* Medium for labels/tags */
+
+  /* Base Typography Scale (1rem = 16px) */
+  --text-base: 1rem;            /* 16px - body text */
+  --text-sm: 0.875rem;          /* 14px - small labels */
+  --text-xs: 0.75rem;           /* 12px - meta information */
+  --text-lg: 1.125rem;          /* 18px - financial data highlights */
+  --text-xl: 1.25rem;           /* 20px - section headers */
+
+  /* Line Heights for readability */
+  --leading-base: 1.6;          /* Body text */
+  --leading-tight: 1.4;         /* Headers */
+  --leading-relaxed: 1.75;      /* Long-form content */
+
+  /* Letter Spacing for Data Clarity */
+  --tracking-data: 0.02em;      /* Monospace data - improves 0/8 distinction */
+  --tracking-normal: 0;         /* UI text */
+  --tracking-wide: 0.05em;      /* All-caps labels */
+}
+
+@theme inline {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  /* Pure OLED Black - no background patterns for maximum contrast */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== REMOVED: Glow Effects ========== */
+/* .subtle-glow class removed - causes eye strain */
+
+/* ========== BUTTON STYLES ========== */
+.recon-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  color: var(--accent-primary);
+  transition: all 0.2s ease;
+  font-weight: var(--font-label);
+}
+
+.recon-btn:hover:not(:disabled) {
+  background: var(--border-primary);
+  border-color: var(--accent-primary);
+}
+
+.recon-btn:focus {
+  outline: 3px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.recon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+
+/* ========== INPUT STYLES ========== */
+.recon-input {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  caret-color: var(--accent-primary);
+}
+
+.recon-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.recon-input:focus {
+  outline: 3px solid var(--accent-primary);
+  outline-offset: 0;
+  border-color: var(--accent-primary);
+}
+
+/* ========== TABLE STYLES ========== */
+.recon-table {
+  border: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+}
+
+.recon-table th {
+  background: var(--bg-primary);
+  color: var(--accent-primary);
+  border-bottom: 1px solid var(--border-primary);
+  font-weight: var(--font-header);
+}
+
+.recon-table td {
+  border-bottom: 1px solid var(--border-secondary);
+  color: var(--text-primary);
+}
+
+.recon-table tr:hover {
+  background: rgba(74, 158, 255, 0.05);
+}
+
+/* ========== STATUS BADGES ========== */
+/* IMPORTANT: Always pair with icons (✓ ⚠ ✗) for accessibility */
+.status-positive {
+  background: var(--success-bg);
+  border: 1px solid var(--state-positive);
+  color: var(--state-positive);
+}
+
+.status-warning {
+  background: var(--warning-bg);
+  border: 1px solid var(--state-warning);
+  color: var(--state-warning);
+}
+
+.status-critical {
+  background: var(--error-bg);
+  border: 1px solid var(--state-critical);
+  color: var(--state-critical);
+}
+
+.status-info {
+  background: var(--info-bg);
+  border: 1px solid var(--state-info);
+  color: var(--state-info);
+}
+
+/* Legacy status styles - updated colors */
+.status-targeting {
+  background: var(--success-bg);
+  border: 1px solid var(--state-positive);
+  color: var(--state-positive);
+}
+
+.status-contacted {
+  background: var(--warning-bg);
+  border: 1px solid var(--state-warning);
+  color: var(--state-warning);
+}
+
+.status-won {
+  background: var(--info-bg);
+  border: 1px solid var(--state-info);
+  color: var(--state-info);
+}
+
+/* ========== ACCESSIBILITY ========== */
+/* All interactive elements get visible focus state */
+a:focus,
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 3px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Ensure link colors have proper contrast */
+a {
+  color: var(--link-default);
+  text-decoration: none;
+}
+
+a:visited {
+  color: var(--link-visited);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ========== UTILITY CLASSES ========== */
+.text-positive { color: var(--state-positive); }
+.text-warning { color: var(--state-warning); }
+.text-critical { color: var(--state-critical); }
+.text-info { color: var(--state-info); }
+.text-muted { color: var(--text-secondary); }
+
+.border-positive { border-color: var(--state-positive); }
+.border-warning { border-color: var(--state-warning); }
+.border-critical { border-color: var(--state-critical); }
+.border-info { border-color: var(--state-info); }
+
+.bg-positive { background: var(--success-bg); }
+.bg-warning { background: var(--warning-bg); }
+.bg-critical { background: var(--error-bg); }
+.bg-info { background: var(--info-bg); }
+
+/* ========== 2026 FINTECH GLASSMORPHISM ========== */
+.glass-bento {
+  background: var(--bg-surface);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-glass);
+  transition: all 0.3s ease;
+}
+
+.glass-bento:hover {
+  border-color: var(--border-glass-hover);
+}
+
+/* Glassmorphic Search Dropdown */
+.glass-dropdown {
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-primary);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.glass-dropdown-item {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.glass-dropdown-item:hover {
+  background: rgba(0, 122, 255, 0.1);
+  border-color: var(--accent-apple-blue);
+}
+
+/* ========== STATUS INDICATOR DOTS ========== */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.status-dot-healthy {
+  background: var(--status-healthy);
+  color: var(--status-healthy);
+}
+
+.status-dot-warning {
+  background: var(--status-warning);
+  color: var(--status-warning);
+}
+
+.status-dot-critical {
+  background: var(--status-critical);
+  color: var(--status-critical);
+}
+
+.status-dot-ai {
+  background: var(--status-ai);
+  color: var(--status-ai);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px currentColor;
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 12px currentColor;
+  }
+}
+
+/* ========== DATA TYPOGRAPHY ========== */
+/* Monospace for numerical data: tickers, prices, ratios, metrics */
+.font-mono-data {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-data);
+  font-weight: 500;
+}
+
+/* UI Typography: Labels, descriptive text, headers */
+.font-ui {
+  font-family: var(--font-ui);
+  letter-spacing: var(--tracking-normal);
+}
+
+/* Financial Data Highlights (PE, Market Cap, Stock Prices) */
+.financial-data {
+  font-family: var(--font-data);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-data);
+  font-variant-numeric: tabular-nums;
+}
+
+/* All-caps labels with wide tracking */
+.label-caps {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ========== CUSTOM SCROLLBARS ========== */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+/* Prevent scrollbar from taking up layout space */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
