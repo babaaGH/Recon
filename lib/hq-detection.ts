@@ -55,7 +55,7 @@ function getUSRegion(stateCode: string): string | null {
   const normalizedState = stateCode.toUpperCase().trim();
 
   for (const [region, states] of Object.entries(US_REGIONS)) {
-    if (states.includes(normalizedState)) {
+    if ((states as readonly string[]).includes(normalizedState)) {
       return region;
     }
   }

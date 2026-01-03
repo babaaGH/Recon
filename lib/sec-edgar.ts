@@ -1240,7 +1240,7 @@ async function fetchFilingSections(cik: string, accessionNumber: string, filingT
       .replace(/\s+/g, ' ')
       .trim();
 
-    const sections: { riskFactors?: string; legalProceedings?: string; mda?: string } = {};
+    const sections: { riskFactors?: string; legalProceedings?: string; mda?: string; fiscalYearEnd?: string } = {};
 
     if (filingType === '10-K') {
       // Item 1A: Risk Factors
@@ -1312,7 +1312,7 @@ export async function getSECData(companyNameOrTicker: string, forceRefresh = fal
   console.log(`Latest 10-Q: ${latest10Q?.filingDate || 'None'}`);
 
   // Step 4: Fetch and parse filing documents with proper section extraction
-  let sections: { riskFactors?: string; legalProceedings?: string; mda?: string } | null = null;
+  let sections: { riskFactors?: string; legalProceedings?: string; mda?: string; fiscalYearEnd?: string } | null = null;
   let filingType: string | undefined;
 
   // Prefer 10-K for most comprehensive data

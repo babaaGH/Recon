@@ -178,7 +178,11 @@ export async function searchCompanyIntel(companyName: string): Promise<CompanyIn
 
     // Use HQ detection result
     const hq = formatHeadquarters(hqResult);
-    const region = hqResult.region;
+    // Ensure region is one of the valid values, default to 'East Coast'
+    const validRegions: Array<'East Coast' | 'South' | 'Mid-West' | 'West' | 'Canada'> = ['East Coast', 'South', 'Mid-West', 'West', 'Canada'];
+    const region = validRegions.includes(hqResult.region as any)
+      ? (hqResult.region as 'East Coast' | 'South' | 'Mid-West' | 'West' | 'Canada')
+      : 'East Coast';
 
     // Determine industry from knowledge graph or name
     let industry = 'Financial Services';

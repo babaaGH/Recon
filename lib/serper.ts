@@ -259,7 +259,7 @@ export async function searchLinkedInTargets(companyName: string): Promise<any[]>
     const filteredTargets = targets
       .filter((t: any) => t.relevanceScore > 0)
       .sort((a: any, b: any) => b.relevanceScore - a.relevanceScore)
-      .map(({ relevanceScore, ...target }) => target); // Remove relevanceScore from final output
+      .map(({ relevanceScore, ...target }: any) => target); // Remove relevanceScore from final output
 
     console.log(`Found ${filteredTargets.length} relevant LinkedIn targets for ${companyName} (filtered from ${targets.length} results)`);
     return filteredTargets;

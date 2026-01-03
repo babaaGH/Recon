@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
     const logoId = await createLogo({
       company_name: body.company_name,
       industry: body.industry,
-      tech_stack: body.tech_stack,
       stalking_status: body.stalking_status || 'Targeting',
       notes: body.notes
     });

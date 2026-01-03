@@ -187,7 +187,7 @@ export default function RevenueChart({ companyName }: RevenueChartProps) {
                 fontSize: '12px'
               }}
               labelStyle={{ color: growthColor }}
-              formatter={(value: any, name: string, props: any) => [props.payload.displayRevenue, 'Revenue']}
+              formatter={(value: any, name?: string, props?: any) => [props?.payload?.displayRevenue || value, 'Revenue']}
             />
             <Bar
               dataKey="revenue"
