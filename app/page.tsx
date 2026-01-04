@@ -53,7 +53,7 @@ export default function Home() {
     e.preventDefault();
 
     if (!companyName.trim()) {
-      setMessage('⚠ Company name required');
+      setMessage('Company name required');
       return;
     }
 
@@ -73,17 +73,17 @@ export default function Home() {
       });
 
       if (!intelResponse.ok) {
-        setMessage('✗ RESEARCH FAILED - DATA UNAVAILABLE');
+        setMessage('RESEARCH FAILED - DATA UNAVAILABLE');
         setLoading(false);
         return;
       }
 
       const intel = await intelResponse.json();
       setSearchResult(intel);
-      setMessage('✓ RESEARCH COMPLETE');
+      setMessage('RESEARCH COMPLETE');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      setMessage('✗ SYSTEM ERROR');
+      setMessage('SYSTEM ERROR');
     } finally {
       setLoading(false);
     }

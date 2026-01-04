@@ -35,7 +35,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="border border-[var(--border-slate)] rounded-lg p-8 text-center bg-[var(--dark-slate)] bg-opacity-20">
           <div className="text-sm opacity-60">
-            ✗ DATA UNAVAILABLE
+            DATA UNAVAILABLE
           </div>
           <div className="text-xs opacity-40 mt-2">
             An error occurred while rendering this section

@@ -100,15 +100,15 @@ export default function WarmIntroPathways({ companyName, targets }: WarmIntroPat
     const hasConference = conferences[targetName]?.length > 0;
 
     if (hasNotes && notes[targetName].toLowerCase().includes('warm')) {
-      return { icon: '🟢', color: 'text-[#10b981]', label: 'WARM INTRO AVAILABLE', description: notes[targetName] };
+      return { icon: '', color: 'text-[#10b981]', label: 'WARM INTRO AVAILABLE', description: notes[targetName] };
     }
     if (hasNotes || hasCustomer) {
-      return { icon: '🟡', color: 'text-[#f59e0b]', label: 'SECOND-DEGREE', description: hasNotes ? notes[targetName] : `Customer overlap: ${customerOverlap[targetName]}` };
+      return { icon: '', color: 'text-[#f59e0b]', label: 'SECOND-DEGREE', description: hasNotes ? notes[targetName] : `Customer overlap: ${customerOverlap[targetName]}` };
     }
     if (hasConference) {
-      return { icon: '📍', color: 'text-[#06b6d4]', label: 'UPCOMING EVENT', description: `${conferences[targetName][0].eventName}` };
+      return { icon: '', color: 'text-[#06b6d4]', label: 'UPCOMING EVENT', description: `${conferences[targetName][0].eventName}` };
     }
-    return { icon: '🔴', color: 'text-[#ef4444]', label: 'COLD OUTREACH REQUIRED', description: 'No warm path identified yet' };
+    return { icon: '', color: 'text-[#ef4444]', label: 'COLD OUTREACH REQUIRED', description: 'No warm path identified yet' };
   };
 
   if (targets.length === 0) {
@@ -119,7 +119,7 @@ export default function WarmIntroPathways({ companyName, targets }: WarmIntroPat
     <div className="border border-[var(--border-slate)] rounded-lg overflow-hidden bg-[var(--dark-slate)] bg-opacity-20">
       <div className="bg-[var(--dark-slate)] px-6 py-4">
         <h3 className="text-lg font-medium opacity-90 mb-1">
-          🤝 WARM INTRO PATHWAYS
+          WARM INTRO PATHWAYS
         </h3>
         <p className="text-xs opacity-50">
           Track connection paths and networking opportunities • Warm intros convert 5-10x better
@@ -151,7 +151,7 @@ export default function WarmIntroPathways({ companyName, targets }: WarmIntroPat
               {/* Pathway Description */}
               {pathway.description && (
                 <div className="mb-4 text-sm bg-[var(--darker-slate)] rounded p-3">
-                  💡 {pathway.description}
+                  {pathway.description}
                 </div>
               )}
 
@@ -162,7 +162,6 @@ export default function WarmIntroPathways({ companyName, targets }: WarmIntroPat
                   onClick={() => openLinkedInSearch(target.name)}
                   className="recon-btn px-4 py-2 rounded text-xs font-bold uppercase tracking-wide text-left flex items-center gap-2"
                 >
-                  <span>🔗</span>
                   <span>Check My Network</span>
                 </button>
 
@@ -172,7 +171,6 @@ export default function WarmIntroPathways({ companyName, targets }: WarmIntroPat
                   disabled={loadingConferences}
                   className="recon-btn px-4 py-2 rounded text-xs font-bold uppercase tracking-wide text-left flex items-center gap-2 disabled:opacity-50"
                 >
-                  <span>📍</span>
                   <span>{loadingConferences ? 'Searching...' : 'Find Conferences'}</span>
                 </button>
               </div>
@@ -190,7 +188,7 @@ export default function WarmIntroPathways({ companyName, targets }: WarmIntroPat
                         className="border border-[#06b6d4] border-opacity-30 rounded p-3 bg-[#06b6d4] bg-opacity-5"
                       >
                         <div className="flex items-start justify-between gap-2 mb-1">
-                          <div className="font-medium text-sm">📍 {conf.eventName}</div>
+                          <div className="font-medium text-sm">{conf.eventName}</div>
                           <div className="text-xs opacity-60">{conf.date}</div>
                         </div>
                         <div className="text-xs opacity-70">
@@ -236,7 +234,7 @@ export default function WarmIntroPathways({ companyName, targets }: WarmIntroPat
               {/* Pro Tip */}
               {pathway.label === 'COLD OUTREACH REQUIRED' && (
                 <div className="mt-4 text-xs opacity-60 bg-[var(--darker-slate)] rounded p-3">
-                  💡 <strong>Pro Tip:</strong> Check LinkedIn for mutual connections, search for their conference appearances, or identify customer overlap for a warm intro path.
+                  <strong>Pro Tip:</strong> Check LinkedIn for mutual connections, search for their conference appearances, or identify customer overlap for a warm intro path.
                 </div>
               )}
             </div>

@@ -65,13 +65,13 @@ export default function SimilarProspects({
   const getFitIcon = (fitLevel: string) => {
     switch (fitLevel) {
       case 'HIGH':
-        return '🟢';
+        return '';
       case 'MEDIUM':
-        return '🟡';
+        return '';
       case 'LOW':
-        return '🔴';
+        return '';
       default:
-        return '⚪';
+        return '';
     }
   };
 
@@ -81,7 +81,7 @@ export default function SimilarProspects({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium opacity-90">
-              🎯 SIMILAR PROSPECTS
+              SIMILAR PROSPECTS
             </h3>
             <p className="text-xs opacity-50 mt-1">
               Find lookalike companies to replicate your winning pitch
@@ -109,7 +109,7 @@ export default function SimilarProspects({
 
           {!loading && prospects.length === 0 && (
             <div className="text-center py-8">
-              <div className="text-sm opacity-60">✗ NO SIMILAR PROSPECTS FOUND</div>
+              <div className="text-sm opacity-60">NO SIMILAR PROSPECTS FOUND</div>
               <div className="text-xs opacity-40 mt-2">Try broadening search criteria</div>
             </div>
           )}
@@ -172,7 +172,7 @@ export default function SimilarProspects({
                       <div className="space-y-1">
                         {prospect.matchReasons.map((reason, idx) => (
                           <div key={idx} className="text-sm opacity-80 flex items-start gap-2">
-                            <span className="text-[#10b981] mt-0.5">✓</span>
+                            <span className="text-[#10b981] mt-0.5"></span>
                             <span>{reason}</span>
                           </div>
                         ))}
@@ -184,12 +184,12 @@ export default function SimilarProspects({
                   {prospect.riskMatches.length > 0 && (
                     <div className="bg-[var(--darker-slate)] rounded p-3 mb-3">
                       <div className="text-xs opacity-60 uppercase tracking-wider mb-2">
-                        🎯 Shared Pain Points (from 10-K)
+                        Shared Pain Points (from 10-K)
                       </div>
                       <div className="space-y-1">
                         {prospect.riskMatches.map((risk, idx) => (
                           <div key={idx} className="text-xs opacity-80 flex items-start gap-2">
-                            <span className="text-[#f59e0b]">⚠</span>
+                            <span className="text-[#f59e0b]">!</span>
                             <span>{risk}</span>
                           </div>
                         ))}
@@ -228,7 +228,7 @@ export default function SimilarProspects({
               {/* Sales Tip */}
               <div className="bg-[#10b981] bg-opacity-10 border border-[#10b981] border-opacity-30 rounded-lg p-4 mt-6">
                 <div className="flex items-start gap-3">
-                  <div className="text-2xl">💡</div>
+                  <div className="text-2xl"></div>
                   <div>
                     <div className="font-bold text-sm text-[#10b981] mb-1">SALES PLAYBOOK</div>
                     <div className="text-xs opacity-80 leading-relaxed">

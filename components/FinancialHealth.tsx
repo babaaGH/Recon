@@ -173,25 +173,16 @@ export default function FinancialHealth({ companyName, metrics }: FinancialHealt
                         </div>
                       </td>
 
-                      {/* Status Icon */}
+                      {/* Status */}
                       <td className="py-4">
                         {metric.status === 'success' && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">✓</span>
-                            <span className="font-ui text-sm text-[#10b981]">Success</span>
-                          </div>
+                          <span className="font-ui text-sm font-semibold text-[#10b981]">Positive</span>
                         )}
                         {metric.status === 'warning' && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">⚠</span>
-                            <span className="font-ui text-sm text-[#fb923c]">Warning</span>
-                          </div>
+                          <span className="font-ui text-sm font-semibold text-[#fb923c]">Warning</span>
                         )}
                         {metric.status === 'neutral' && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">−</span>
-                            <span className="font-ui text-sm text-[#888888]">Neutral</span>
-                          </div>
+                          <span className="font-ui text-sm font-semibold text-[#ef4444]">Negative</span>
                         )}
                       </td>
 

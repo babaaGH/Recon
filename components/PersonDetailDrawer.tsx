@@ -140,7 +140,7 @@ export default function PersonDetailDrawer({ person, isOpen, onClose }: PersonDe
                     <div className="space-y-2">
                       {careerData.keyAchievements.map((achievement, idx) => (
                         <div key={idx} className="flex items-start gap-2">
-                          <span className="text-[#10b981] mt-1">✓</span>
+                          <span className="text-[#10b981] mt-1"></span>
                           <span className="text-sm opacity-80">{achievement}</span>
                         </div>
                       ))}
@@ -171,15 +171,15 @@ export default function PersonDetailDrawer({ person, isOpen, onClose }: PersonDe
                     <h3 className="text-sm font-bold uppercase tracking-wider opacity-60 mb-3">Engagement Suggestions</h3>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm opacity-80">
-                        <span>📧</span>
+                        <span></span>
                         <span>Personalized email referencing recent conference talk</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm opacity-80">
-                        <span>💼</span>
+                        <span></span>
                         <span>LinkedIn connection request with mutual interest mention</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm opacity-80">
-                        <span>🎯</span>
+                        <span></span>
                         <span>Schedule meeting around upcoming industry event</span>
                       </div>
                     </div>

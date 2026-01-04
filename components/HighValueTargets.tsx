@@ -155,7 +155,7 @@ export default function HighValueTargets({ companyName, targets: propTargets, lo
   if (error) {
     return (
       <div className="p-8 text-center">
-        <div className="label-caps opacity-60">✗ MANUAL SEARCH REQUIRED</div>
+        <div className="label-caps opacity-60">MANUAL SEARCH REQUIRED</div>
         <div className="font-ui text-xs opacity-40 mt-2">{error}</div>
       </div>
     );
@@ -164,7 +164,7 @@ export default function HighValueTargets({ companyName, targets: propTargets, lo
   if (targets.length === 0) {
     return (
       <div className="p-8 text-center">
-        <div className="label-caps opacity-60">✗ MANUAL SEARCH REQUIRED</div>
+        <div className="label-caps opacity-60">MANUAL SEARCH REQUIRED</div>
         <div className="font-ui text-xs opacity-40 mt-2">No executive profiles found</div>
       </div>
     );
@@ -332,7 +332,7 @@ export default function HighValueTargets({ companyName, targets: propTargets, lo
                           key={idx}
                           className="text-sm font-ui text-[#10b981] flex items-center gap-2"
                         >
-                          <span>📍</span>
+                          <span></span>
                           <span>{conf.eventName}</span>
                           <span className="font-mono-data text-xs text-[var(--text-secondary)]" style={{ letterSpacing: '0.02em' }}>
                             • {conf.date}

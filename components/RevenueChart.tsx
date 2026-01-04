@@ -131,7 +131,7 @@ export default function RevenueChart({ companyName }: RevenueChartProps) {
     return (
       <div className="border border-[var(--border-slate)] rounded-lg p-8 text-center bg-[var(--dark-slate)] bg-opacity-20">
         <div className="text-sm opacity-60">
-          ✗ DATA UNAVAILABLE
+          DATA UNAVAILABLE
         </div>
         {error && (
           <div className="text-xs opacity-40 mt-2">

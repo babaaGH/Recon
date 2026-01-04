@@ -247,7 +247,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
   if (error) {
     return (
       <div className="border border-[var(--border-slate)] rounded-lg p-8 text-center bg-[var(--dark-slate)] bg-opacity-20">
-        <div className="text-sm opacity-60">✗ NOT A PUBLIC COMPANY</div>
+        <div className="text-sm opacity-60">NOT A PUBLIC COMPANY</div>
         <div className="text-xs opacity-40 mt-2">{error}</div>
       </div>
     );
@@ -273,13 +273,13 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'fine':
-        return '💰 FINE';
+        return 'FINE';
       case 'settlement':
-        return '⚖️ SETTLEMENT';
+        return 'SETTLEMENT';
       case 'investigation':
-        return '🔍 INVESTIGATION';
+        return 'INVESTIGATION';
       default:
-        return '⚠️ LITIGATION';
+        return 'LITIGATION';
     }
   };
 
@@ -356,7 +356,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
             </>
           ) : (
             <div className="text-xs opacity-60">
-              ✓ Fresh data from SEC EDGAR
+              Fresh data from SEC EDGAR
             </div>
           )}
         </div>
@@ -365,7 +365,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
           disabled={refreshing || loading}
           className="recon-btn px-4 py-2 rounded text-xs font-bold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {refreshing ? '🔄 REFRESHING...' : '🔄 REFRESH SEC DATA'}
+          {refreshing ? 'REFRESHING...' : 'REFRESH SEC DATA'}
         </button>
       </div>
 
@@ -379,7 +379,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-[var(--text-primary)]">
-                  💰 FINANCIAL HEALTH
+                  FINANCIAL HEALTH
                 </h3>
                 <p className="text-xs text-[var(--text-muted)] mt-1">
                   From SEC XBRL Financial Data{secData.financials.reportPeriod && ` • Period ending ${secData.financials.reportPeriod}`}
@@ -615,10 +615,10 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                     {(() => {
                       const phase = secData.financials.fiscalYear.budgetCyclePhase;
                       const phaseStyles = {
-                        'BUDGET FLUSH': { bg: 'bg-[var(--accent-amber)]', icon: '🟡', text: 'text-black' },
-                        'PLANNING': { bg: 'bg-[var(--accent-cyan)]', icon: '📋', text: 'text-black' },
-                        'EXECUTION': { bg: 'bg-[#10b981]', icon: '✓', text: 'text-black' },
-                        'NEW YEAR SETUP': { bg: 'bg-[var(--accent-indigo)]', icon: '🆕', text: 'text-white' }
+                        'BUDGET FLUSH': { bg: 'bg-[var(--accent-amber)]', icon: '', text: 'text-black' },
+                        'PLANNING': { bg: 'bg-[var(--accent-cyan)]', icon: '', text: 'text-black' },
+                        'EXECUTION': { bg: 'bg-[#10b981]', icon: '', text: 'text-black' },
+                        'NEW YEAR SETUP': { bg: 'bg-[var(--accent-indigo)]', icon: '', text: 'text-white' }
                       };
                       const style = phaseStyles[phase];
                       return (
@@ -686,8 +686,8 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
           >
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-[#ef4444]">
-                  🚨 PAIN SIGNALS
+                <h3 className="text-lg font-medium text-[var(--text-primary)]">
+                  PAIN SIGNALS
                 </h3>
                 <p className="text-xs opacity-70 mt-1 text-[#e5e7eb]">
                   High-priority issues from SEC filings
@@ -811,7 +811,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
         <div className="border border-[var(--border-slate)] rounded-lg overflow-hidden bg-[var(--dark-slate)] bg-opacity-20">
           <div className="bg-[var(--dark-slate)] px-6 py-4">
             <h3 className="text-lg font-medium text-[var(--text-primary)] mb-1">
-              🎯 STRATEGIC PRIORITIES
+              STRATEGIC PRIORITIES
             </h3>
             <p className="text-xs text-[var(--text-muted)]">
               Forward-looking technology initiatives from Management Discussion & Analysis
@@ -832,7 +832,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                 'DIRECT MATCH': {
                   bg: 'bg-[#10b981]',
                   text: 'text-black',
-                  icon: '✓',
+                  icon: '',
                   border: 'border-l-[#10b981]'
                 },
                 'ADJACENT OPPORTUNITY': {
@@ -853,12 +853,12 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
 
               // Category icons
               const categoryIcons = {
-                'Cloud': '☁️',
-                'Legacy Modernization': '🔄',
-                'Cybersecurity': '🔒',
-                'AI/Automation': '🤖',
-                'Digital Transformation': '⚡',
-                'Infrastructure': '🏗️'
+                'Cloud': '',
+                'Legacy Modernization': '',
+                'Cybersecurity': '',
+                'AI/Automation': '',
+                'Digital Transformation': '',
+                'Infrastructure': ''
               };
 
               return (
@@ -900,7 +900,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                         {/* Budget if mentioned */}
                         {priority.budgetMentioned && (
                           <div className="text-xs font-medium opacity-80">
-                            💰 Budget: {priority.budgetMentioned}
+                            Budget: {priority.budgetMentioned}
                           </div>
                         )}
 
@@ -941,13 +941,13 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
               };
 
               const priorityIcons = {
-                'HOT': '🔴',
-                'WARM': '🟡',
-                'MONITOR': '⚪'
+                'HOT': '',
+                'WARM': '',
+                'MONITOR': ''
               };
 
               // Change type icons
-              const changeIcon = change.changeType === 'appointment' ? '➕' : change.changeType === 'departure' ? '➖' : '↔️';
+              const changeIcon = change.changeType === 'appointment' ? '+' : change.changeType === 'departure' ? '-' : '~';
 
               return (
                 <div
@@ -994,7 +994,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                   {/* Sales Implication */}
                   <div className="bg-[#10b981] bg-opacity-10 border border-[#10b981] border-opacity-30 rounded p-3">
                     <div className="text-xs font-bold text-[#10b981] mb-1 uppercase tracking-wide">
-                      💡 Why This Matters
+                      Why This Matters
                     </div>
                     <div className="text-sm text-[#10b981]">
                       {change.salesImplication}
@@ -1005,7 +1005,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                   {change.priority === 'HOT' && change.daysInRole <= 90 && (
                     <div className="mt-3 pt-3 border-t border-[var(--border-slate)]">
                       <div className="text-xs font-bold text-[#ef4444] uppercase tracking-wide mb-1">
-                        ⚡ PRIORITY ACTION
+                        PRIORITY ACTION
                       </div>
                       <div className="text-sm opacity-90">
                         Initiate contact within next 30 days while establishing vendor relationships
@@ -1024,7 +1024,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
         <div className="border border-[var(--border-slate)] rounded-lg overflow-hidden bg-[var(--dark-slate)] bg-opacity-20">
           <div className="bg-[var(--dark-slate)] px-6 py-4">
             <h3 className="text-lg font-medium text-[var(--text-primary)] mb-1">
-              ⚠️ IT RISK INTELLIGENCE
+              IT RISK INTELLIGENCE
             </h3>
             <p className="text-xs text-[var(--text-muted)] mb-4">
               AI-processed risks from 10-K filings • Top {secData.processedRisks.length} by relevance
@@ -1071,12 +1071,12 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                 };
 
                 const categoryIcons = {
-                  'Security': '🔒',
-                  'Legacy Tech': '⚙️',
-                  'Cloud': '☁️',
-                  'Compliance': '📋',
-                  'Integration': '🔗',
-                  'Resilience': '🛡️'
+                  'Security': '',
+                  'Legacy Tech': '',
+                  'Cloud': '',
+                  'Compliance': '',
+                  'Integration': '',
+                  'Resilience': ''
                 };
 
                 return (
@@ -1105,7 +1105,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                     {/* Sales Angle */}
                     <div className="bg-[#10b981] bg-opacity-10 border border-[#10b981] border-opacity-30 rounded p-3 mt-3">
                       <div className="text-xs font-bold text-[#10b981] mb-1 uppercase tracking-wide">
-                        💡 Sales Angle
+                        Sales Angle
                       </div>
                       <div className="text-sm text-[#10b981]">
                         {risk.salesAngle}
@@ -1143,7 +1143,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
         <div className="border border-[var(--border-slate)] rounded-lg overflow-hidden bg-[var(--dark-slate)] bg-opacity-20">
           <div className="bg-[var(--dark-slate)] px-6 py-4">
             <h3 className="text-lg font-medium text-[var(--text-primary)]">
-              ⚖️ LEGAL EXPOSURE INTELLIGENCE
+              LEGAL EXPOSURE INTELLIGENCE
             </h3>
             <p className="text-xs text-[var(--text-muted)] mt-1">
               Financial context and IT-relevant litigation from SEC filings
@@ -1163,10 +1163,10 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                     </div>
                     {(() => {
                       const riskColors = {
-                        'LOW': '🟢',
-                        'MEDIUM': '🟡',
-                        'HIGH': '🔴',
-                        'CRITICAL': '🔴'
+                        'LOW': '',
+                        'MEDIUM': '',
+                        'HIGH': '',
+                        'CRITICAL': ''
                       };
                       return (
                         <span className="text-lg">
@@ -1180,7 +1180,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                   </div>
                   {secData.legalExposure.isMaterialRisk && secData.legalExposure.revenuePercentage && (
                     <div className="mt-2 text-xs font-bold text-[#ef4444] bg-[#ef4444] bg-opacity-10 px-2 py-1 rounded">
-                      ⚠️ MATERIAL RISK: {secData.legalExposure.revenuePercentage.toFixed(1)}% of annual revenue
+                      MATERIAL RISK: {secData.legalExposure.revenuePercentage.toFixed(1)}% of annual revenue
                     </div>
                   )}
                 </div>
@@ -1214,7 +1214,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
           {secData.legalProceedings.filter(p => p.isITRelated).length > 0 && (
             <div className="px-6 py-4 border-b border-[var(--border-slate)]">
               <h4 className="text-sm font-bold text-[#10b981] mb-3">
-                💻 IT-RELATED CASES ({secData.legalProceedings.filter(p => p.isITRelated).length})
+                IT-RELATED CASES ({secData.legalProceedings.filter(p => p.isITRelated).length})
               </h4>
               <div className="space-y-3">
                 {secData.legalProceedings.filter(p => p.isITRelated).map((proceeding, index) => (
@@ -1255,7 +1255,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
           {secData.legalProceedings.filter(p => p.category === 'Regulatory').length > 0 && (
             <div className="px-6 py-4 border-b border-[var(--border-slate)]">
               <h4 className="text-sm font-bold text-[#8b5cf6] mb-3">
-                🏛️ REGULATORY ACTIONS ({secData.legalProceedings.filter(p => p.category === 'Regulatory').length})
+                REGULATORY ACTIONS ({secData.legalProceedings.filter(p => p.category === 'Regulatory').length})
               </h4>
               <div className="space-y-3">
                 {secData.legalProceedings.filter(p => p.category === 'Regulatory').map((proceeding, index) => (
@@ -1270,7 +1270,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
                         </span>
                         {proceeding.isITRelated && (
                           <span className="text-xs font-medium bg-[#10b981] text-black px-2 py-1 rounded">
-                            💻 IT-RELATED
+                            IT-RELATED
                           </span>
                         )}
                       </div>
@@ -1298,7 +1298,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
           {secData.legalProceedings.filter(p => !p.isITRelated && p.category !== 'Regulatory').length > 0 && (
             <div className="px-6 py-4">
               <h4 className="text-sm font-bold opacity-70 mb-3">
-                📋 OTHER CASES ({secData.legalProceedings.filter(p => !p.isITRelated && p.category !== 'Regulatory').length})
+                OTHER CASES ({secData.legalProceedings.filter(p => !p.isITRelated && p.category !== 'Regulatory').length})
               </h4>
               <div className="space-y-3">
                 {secData.legalProceedings.filter(p => !p.isITRelated && p.category !== 'Regulatory').map((proceeding, index) => (

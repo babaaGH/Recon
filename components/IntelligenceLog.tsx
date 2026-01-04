@@ -87,7 +87,7 @@ export default function IntelligenceLog() {
                   ●
                 </motion.span>
               ) : (
-                <span className="text-[#10b981]">✓</span>
+                <span className="text-[#10b981]"></span>
               )}
               <TypewriterText
                 text={log.message}
@@ -105,7 +105,7 @@ export default function IntelligenceLog() {
             transition={{ delay: 0.3 }}
             className="mt-6 pt-6 border-t border-[var(--border-slate)] text-center"
           >
-            <span className="text-[#10b981]">✓ INTELLIGENCE GATHERING COMPLETE</span>
+            <span className="text-[#10b981]">INTELLIGENCE GATHERING COMPLETE</span>
           </motion.div>
         )}
       </div>
