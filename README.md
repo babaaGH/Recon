@@ -97,6 +97,14 @@ RECON is a professional B2B sales intelligence platform designed for financial s
 - **Gradient Visualization**: Green/red fill based on performance
 - **Ticker Integration**: Automatic symbol resolution
 
+### 7. Hiring Intelligence
+
+- **Job Openings Analysis**: Real-time data from PredictLeads API
+- **Department Breakdown**: Engineering vs. Sales vs. Marketing
+- **Vertical Bar Chart**: Monochrome blue color palette for clean visualization
+- **Total Headcount**: Aggregated open positions
+- **Hiring Signal**: Identifies which department is actively growing
+
 ---
 
 ## Technology Stack
@@ -123,6 +131,7 @@ RECON is a professional B2B sales intelligence platform designed for financial s
 - **Polygon.io**: Stock market data
 - **SEC EDGAR**: Government financial filings
 - **Alpha Vantage**: Financial metrics
+- **PredictLeads**: Job openings & hiring intelligence
 - **Brandfetch**: Company logos & autocomplete
 
 ---
@@ -280,6 +289,10 @@ ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
 # Get your API key from: https://polygon.io/
 POLYGON_API_KEY=your_polygon_api_key_here
 
+# PredictLeads API Key for hiring intelligence data
+# Get your API key from: https://www.predictleads.com/
+PREDICTLEADS_API_KEY=your_predictleads_api_key_here
+
 # Brandfetch API Key for company logo autocomplete (optional)
 # Get your API key from: https://brandfetch.com/
 # Note: NEXT_PUBLIC_ prefix makes this available on the client side
@@ -311,7 +324,14 @@ NEXT_PUBLIC_BRANDFETCH_CLIENT_ID=your_brandfetch_client_id
 3. Free tier: 25 requests/day
 4. Used for: Financial metrics, revenue data
 
-#### 4. Brandfetch (Optional - Enhances UX)
+#### 4. PredictLeads (Optional - Hiring Intelligence)
+
+1. Visit: https://www.predictleads.com/
+2. Sign up for account
+3. Get API key from dashboard
+4. Used for: Job openings data (Engineering/Sales/Marketing breakdown)
+
+#### 5. Brandfetch (Optional - Enhances UX)
 
 1. Visit: https://brandfetch.com/
 2. Sign up for account
@@ -325,6 +345,7 @@ NEXT_PUBLIC_BRANDFETCH_CLIENT_ID=your_brandfetch_client_id
 | Serper | 2,500 searches | $50/5,000 | $0.01 |
 | Polygon.io | 5 calls/min | Unlimited | Varies |
 | Alpha Vantage | 25/day | 1,200/day | Free/$50/mo |
+| PredictLeads | Varies | Custom | Contact vendor |
 | Brandfetch | Limited | Unlimited | Free/Premium |
 
 ### Environment Variable Security

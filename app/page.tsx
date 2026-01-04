@@ -5,6 +5,7 @@ import HighValueTargets from '@/components/HighValueTargets';
 import SECFilings from '@/components/SECFilings';
 import FinancialHealth from '@/components/FinancialHealth';
 import NewsSentiment from '@/components/NewsSentiment';
+import HiringIntelligence from '@/components/HiringIntelligence';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import IntelligenceLog from '@/components/IntelligenceLog';
 import Image from 'next/image';
@@ -360,6 +361,11 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+
+                {/* Hiring Intelligence */}
+                <ErrorBoundary>
+                  <HiringIntelligence companyName={searchResult.company_name} />
+                </ErrorBoundary>
               </div>
               </div>
 
