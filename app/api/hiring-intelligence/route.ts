@@ -29,8 +29,11 @@ function generateMockHiringData(companyName: string) {
 }
 
 export async function POST(request: NextRequest) {
+  let companyName = '';
+
   try {
-    const { companyName } = await request.json();
+    const body = await request.json();
+    companyName = body.companyName || '';
 
     if (!companyName) {
       return NextResponse.json({ error: 'Company name required' }, { status: 400 });
@@ -128,8 +131,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching hiring intelligence:', error);
 
-    // Return realistic mock data on error
-    const mockData = generateMockHiringData(companyName);
+    // Return realistic mock data on error (fallback to 'Unknown' if no company name)
+    const mockData = generateMockHiringData(companyName || 'Unknown Company');
     return NextResponse.json(mockData);
   }
 }
