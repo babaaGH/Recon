@@ -77,7 +77,7 @@ export default function FinancialHealth({ companyName, metrics }: FinancialHealt
         <div className="flex items-center justify-between gap-6">
           {/* Health Score */}
           <div>
-            <div className="label-caps opacity-60 mb-1">Health Score</div>
+            <div className="label-caps opacity-60 mb-1">Financial Health Score</div>
             <div className="font-mono-data text-3xl" style={{ color: statusColor, letterSpacing: '0.02em' }}>
               {healthScore}
             </div>

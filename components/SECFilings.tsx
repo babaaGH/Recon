@@ -725,7 +725,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-medium text-[var(--text-primary)]">
-                📁 REGULATORY FILINGS & DISCLOSURES
+                REGULATORY FILINGS & DISCLOSURES
               </h3>
               <p className="text-xs text-[var(--text-muted)] mt-1">
                 CIK: {secData.cik} {secData.ticker && `• Ticker: ${secData.ticker}`}

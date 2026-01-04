@@ -105,7 +105,7 @@ export default function StockChart({ ticker, data, loading }: StockChartProps) {
 
       {/* Chart - 2026 Fintech Hardened */}
       <div className="p-6 bg-black">
-        <ResponsiveContainer width="100%" height={280}>
+        <ResponsiveContainer width="100%" height={200}>
           <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="stockGradient" x1="0" y1="0" x2="0" y2="1">
