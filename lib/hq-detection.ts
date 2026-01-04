@@ -27,25 +27,30 @@ interface CachedHQ {
 // Initialize SQLite cache database
 let db: Database.Database | null = null;
 
-function getDatabase(): Database.Database {
+function getDatabase(): Database.Database | null {
   if (db) return db;
 
-  const dbPath = path.join(process.cwd(), 'company-metadata.db');
-  db = new Database(dbPath);
+  try {
+    const dbPath = path.join(process.cwd(), 'company-metadata.db');
+    db = new Database(dbPath);
 
-  // Create company_metadata table if it doesn't exist
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS company_metadata (
-      company_name TEXT PRIMARY KEY,
-      headquarters TEXT NOT NULL,
-      region TEXT NOT NULL,
-      source TEXT NOT NULL,
-      last_updated INTEGER NOT NULL
-    )
-  `);
+    // Create company_metadata table if it doesn't exist
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS company_metadata (
+        company_name TEXT PRIMARY KEY,
+        headquarters TEXT NOT NULL,
+        region TEXT NOT NULL,
+        source TEXT NOT NULL,
+        last_updated INTEGER NOT NULL
+      )
+    `);
 
-  console.log('✓ Company metadata cache database initialized');
-  return db;
+    console.log('✓ Company metadata cache database initialized');
+    return db;
+  } catch (error) {
+    console.warn('⚠ Database not available (running in serverless environment), caching disabled');
+    return null;
+  }
 }
 
 /**
@@ -69,6 +74,8 @@ function getUSRegion(stateCode: string): string | null {
 function getCachedHQ(companyName: string): HQResult | null {
   try {
     const database = getDatabase();
+    if (!database) return null; // No cache in serverless
+
     const stmt = database.prepare('SELECT * FROM company_metadata WHERE company_name = ?');
     const cached = stmt.get(companyName.toLowerCase()) as CachedHQ | undefined;
 
@@ -99,6 +106,11 @@ function getCachedHQ(companyName: string): HQResult | null {
 function cacheHQ(companyName: string, hq: string, region: string, source: 'sec' | 'serper'): void {
   try {
     const database = getDatabase();
+    if (!database) {
+      console.log(`⚠ Cache disabled for ${companyName} (serverless environment)`);
+      return; // Skip caching in serverless
+    }
+
     const stmt = database.prepare(`
       INSERT OR REPLACE INTO company_metadata (company_name, headquarters, region, source, last_updated)
       VALUES (?, ?, ?, ?, ?)
