@@ -63,17 +63,17 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
 
   if (loading) {
     return (
-      <div className="glass-bento rounded-lg overflow-hidden">
-        <div className="bg-[var(--dark-slate)] px-6 py-4">
-          <h3 className="text-lg font-medium opacity-90">
-            HIRING INTELLIGENCE
+      <div className="border border-[var(--border-slate)] rounded-lg overflow-hidden bg-[var(--dark-slate)] bg-opacity-20">
+        <div className="bg-[var(--dark-slate)] px-6 py-4 border-b border-[var(--border-slate)]">
+          <h3 className="text-base font-semibold text-[var(--text-primary)] uppercase tracking-wider">
+            Hiring Intelligence
           </h3>
-          <p className="text-xs opacity-50 mt-1">
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
             Active job postings by department
           </p>
         </div>
-        <div className="p-6 text-center">
-          <div className="text-sm opacity-60">[ ANALYZING JOB POSTINGS... ]</div>
+        <div className="p-6 bg-black bg-opacity-30 text-center">
+          <div className="text-sm text-gray-400">[ ANALYZING JOB POSTINGS... ]</div>
         </div>
       </div>
     );
@@ -81,18 +81,18 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
 
   if (error || totalJobs === 0) {
     return (
-      <div className="glass-bento rounded-lg overflow-hidden">
-        <div className="bg-[var(--dark-slate)] px-6 py-4">
-          <h3 className="text-lg font-medium opacity-90">
-            HIRING INTELLIGENCE
+      <div className="border border-[var(--border-slate)] rounded-lg overflow-hidden bg-[var(--dark-slate)] bg-opacity-20">
+        <div className="bg-[var(--dark-slate)] px-6 py-4 border-b border-[var(--border-slate)]">
+          <h3 className="text-base font-semibold text-[var(--text-primary)] uppercase tracking-wider">
+            Hiring Intelligence
           </h3>
-          <p className="text-xs opacity-50 mt-1">
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
             Active job postings by department
           </p>
         </div>
-        <div className="p-6 text-center">
-          <div className="text-sm opacity-60">NO DATA AVAILABLE</div>
-          <div className="text-xs opacity-40 mt-2">
+        <div className="p-6 bg-black bg-opacity-30 text-center">
+          <div className="text-sm text-gray-400">NO DATA AVAILABLE</div>
+          <div className="text-xs text-gray-500 mt-2">
             {error ? 'API unavailable' : 'No active job postings found'}
           </div>
         </div>
@@ -101,44 +101,44 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
   }
 
   return (
-    <div className="glass-bento rounded-lg overflow-hidden">
-      <div className="bg-[var(--dark-slate)] px-6 py-4">
-        <h3 className="text-lg font-medium opacity-90">
-          HIRING INTELLIGENCE
+    <div className="border border-[var(--border-slate)] rounded-lg overflow-hidden bg-[var(--dark-slate)] bg-opacity-20">
+      <div className="bg-[var(--dark-slate)] px-6 py-4 border-b border-[var(--border-slate)]">
+        <h3 className="text-base font-semibold text-[var(--text-primary)] uppercase tracking-wider">
+          Hiring Intelligence
         </h3>
-        <p className="text-xs opacity-50 mt-1">
+        <p className="text-xs text-[var(--text-secondary)] mt-1">
           Active job postings by department
         </p>
       </div>
 
-      <div className="p-6">
+      <div className="p-6 bg-black bg-opacity-30">
         {/* Total Count */}
-        <div className="mb-6 text-center">
-          <div className="text-3xl font-mono-data font-bold text-[#3b82f6]">
+        <div className="mb-6 text-center bg-[#007AFF] bg-opacity-10 rounded-lg py-4 border border-[#007AFF] border-opacity-20">
+          <div className="text-4xl font-mono font-bold text-[#007AFF]">
             {totalJobs}
           </div>
-          <div className="text-xs opacity-60 uppercase tracking-wider mt-1">
+          <div className="text-xs text-gray-400 uppercase tracking-wider mt-2">
             Total Open Positions
           </div>
         </div>
 
         {/* Vertical Bar Chart */}
-        <div className="h-48">
+        <div className="h-40 mb-4 bg-black bg-opacity-40 rounded-lg p-3">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={jobData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+            <BarChart data={jobData} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
               <XAxis
                 dataKey="department"
                 tick={{ fill: '#9ca3af', fontSize: 11 }}
-                axisLine={{ stroke: '#374151' }}
+                axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fill: '#9ca3af', fontSize: 11 }}
-                axisLine={{ stroke: '#374151' }}
+                tick={{ fill: '#9ca3af', fontSize: 10 }}
+                axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
                 tickLine={false}
-                width={30}
+                width={25}
               />
-              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                 {jobData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={BLUE_COLORS[index % BLUE_COLORS.length]} />
                 ))}
@@ -148,17 +148,17 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
         </div>
 
         {/* Department Breakdown */}
-        <div className="mt-6 space-y-3">
+        <div className="space-y-2">
           {jobData.map((dept, index) => (
-            <div key={dept.department} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div key={dept.department} className="flex items-center justify-between p-3 rounded bg-black bg-opacity-40 hover:bg-opacity-60 transition-colors">
+              <div className="flex items-center gap-3">
                 <div
-                  className="w-3 h-3 rounded-sm"
+                  className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: BLUE_COLORS[index % BLUE_COLORS.length] }}
                 />
-                <span className="text-sm opacity-80">{dept.department}</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">{dept.department}</span>
               </div>
-              <div className="font-mono-data text-sm font-semibold" style={{ color: BLUE_COLORS[index % BLUE_COLORS.length] }}>
+              <div className="font-mono text-lg font-bold" style={{ color: BLUE_COLORS[index % BLUE_COLORS.length] }}>
                 {dept.count}
               </div>
             </div>
@@ -166,9 +166,9 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
         </div>
 
         {/* Insight */}
-        <div className="mt-6 pt-4 border-t border-[var(--border-slate)]">
-          <div className="text-xs opacity-70 leading-relaxed">
-            <strong className="text-[#3b82f6]">Hiring Signal:</strong>{' '}
+        <div className="mt-4 p-3 rounded bg-[#007AFF] bg-opacity-10 border border-[#007AFF] border-opacity-20">
+          <div className="text-xs text-gray-300 leading-relaxed">
+            <strong className="text-[#007AFF]">Growth Signal:</strong>{' '}
             {jobData.reduce((max, dept) => max.count > dept.count ? max : dept).department} is actively hiring
             {totalJobs > 10 ? ', indicating strong growth momentum' : ''}
           </div>
