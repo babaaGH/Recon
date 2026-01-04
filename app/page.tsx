@@ -1,12 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import HighValueTargets from '@/components/HighValueTargets';
-import SECFilings from '@/components/SECFilings';
-import FinancialHealth from '@/components/FinancialHealth';
-import NewsSentiment from '@/components/NewsSentiment';
-import HiringIntelligence from '@/components/HiringIntelligence';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import CompanyIntelligence from '@/components/CompanyIntelligence';
+import FinancialCore from '@/components/FinancialCore';
+import StrategyEcosystem from '@/components/StrategyEcosystem';
 import IntelligenceLog from '@/components/IntelligenceLog';
 import Image from 'next/image';
 
@@ -21,6 +18,7 @@ interface CompanyIntel {
   stature: string;
   it_signal: string;
   executive_summary: string;
+  ticker?: string;
 }
 
 interface LinkedInTarget {
@@ -48,6 +46,7 @@ export default function Home() {
   const [targetsLoading, setTargetsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<BrandfetchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -61,6 +60,7 @@ export default function Home() {
     setLoading(true);
     setMessage('');
     setSearchResult(null);
+    setLogoUrl(undefined);
 
     try {
       const intelResponse = await fetch('/api/intel', {
@@ -83,6 +83,21 @@ export default function Home() {
       setSearchResult(intel);
       setMessage('RESEARCH COMPLETE');
       setTimeout(() => setMessage(''), 3000);
+
+      // Get ticker symbol
+      if (intel.company_name) {
+        try {
+          const tickerRes = await fetch(`https://financialmodelingprep.com/api/v3/search?query=${encodeURIComponent(intel.company_name)}&limit=1&apikey=demo`);
+          if (tickerRes.ok) {
+            const tickerData = await tickerRes.json();
+            if (tickerData && tickerData.length > 0 && tickerData[0].symbol) {
+              setSearchResult(prev => prev ? { ...prev, ticker: tickerData[0].symbol } : null);
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching ticker:', err);
+        }
+      }
     } catch (error) {
       setMessage('SYSTEM ERROR');
     } finally {
@@ -99,33 +114,21 @@ export default function Home() {
 
     let cancelled = false;
 
-    const loadTargets = async () => {
+    const fetchTargets = async () => {
       setTargetsLoading(true);
-
       try {
         const response = await fetch('/api/targets', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ company: searchResult.company_name }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ companyName: searchResult.company_name }),
         });
 
-        if (cancelled) return;
-
-        if (!response.ok) {
-          setTargets([]);
-          return;
-        }
-
-        const data = await response.json();
-        if (!cancelled) {
+        if (response.ok && !cancelled) {
+          const data = await response.json();
           setTargets(data.targets || []);
         }
-      } catch (err) {
-        if (!cancelled) {
-          setTargets([]);
-        }
+      } catch (error) {
+        console.error('Error fetching targets:', error);
       } finally {
         if (!cancelled) {
           setTargetsLoading(false);
@@ -133,22 +136,22 @@ export default function Home() {
       }
     };
 
-    loadTargets();
+    fetchTargets();
 
     return () => {
       cancelled = true;
     };
   }, [searchResult]);
 
-  // Debounced Brandfetch autocomplete search
+  // Company name autocomplete
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      if (companyName.trim().length < 2) {
-        setSuggestions([]);
-        setShowSuggestions(false);
-        return;
-      }
+    if (companyName.trim().length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
 
+    const timer = setTimeout(async () => {
       try {
         const response = await fetch(
           `https://api.brandfetch.io/v2/search/${encodeURIComponent(companyName)}?c=${process.env.NEXT_PUBLIC_BRANDFETCH_CLIENT_ID || 'demo'}`
@@ -156,14 +159,14 @@ export default function Home() {
 
         if (response.ok) {
           const data = await response.json();
-          setSuggestions(data.slice(0, 5)); // Show top 5 results
+          setSuggestions(data.slice(0, 5));
           setShowSuggestions(true);
         }
       } catch (error) {
         console.error('Brandfetch error:', error);
         setSuggestions([]);
       }
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [companyName]);
@@ -184,7 +187,7 @@ export default function Home() {
   const handleSelectSuggestion = (suggestion: BrandfetchSuggestion) => {
     setCompanyName(suggestion.name);
     setShowSuggestions(false);
-    // Trigger search automatically
+    setLogoUrl(suggestion.icon);
     setTimeout(() => {
       const form = document.querySelector('form');
       if (form) {
@@ -195,234 +198,106 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col">
-      {/* Fixed Header */}
-      <header className="flex-shrink-0 px-8 pt-6 pb-4">
-        <div className="border border-[var(--border-primary)] rounded-lg p-6 bg-[var(--bg-secondary)]">
-          <div className="flex items-center justify-between gap-6">
-            {/* Logo - Left - More Prominent */}
-            <div className="flex-shrink-0">
-              <h1 className="text-3xl font-ui font-bold tracking-[0.2em] text-[#007AFF]">
-                RECON
-              </h1>
-              <p className="font-ui text-sm text-[var(--text-secondary)] mt-1">Sales Intelligence Platform</p>
-            </div>
+    <div className="h-screen overflow-hidden flex flex-col bg-[#000]">
+      {/* Fixed Header - Search Bar */}
+      <header className="flex-shrink-0 px-8 pt-6 pb-4 border-b border-[#333]">
+        <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+          <div className="relative" ref={searchRef}>
+            <input
+              type="text"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              placeholder="Search company intelligence..."
+              className="w-full px-6 py-4 pr-24 rounded-lg border border-[#333] bg-black text-base text-white focus:outline-none focus:border-[#007AFF] transition-colors placeholder:text-gray-600"
+              disabled={loading}
+              autoComplete="off"
+            />
+            <button
+              type="submit"
+              className="absolute right-3 top-1/2 -translate-y-1/2 px-6 py-2 bg-[#007AFF] text-white text-sm font-bold uppercase tracking-wide rounded hover:bg-[#0066CC] transition-all disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? 'Analyzing...' : 'Search'}
+            </button>
 
-            {/* Search Bar - Shorter */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-md">
-              <div className="relative" ref={searchRef}>
-                <input
-                  type="text"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                  placeholder="Search company intelligence..."
-                  className="w-full px-4 py-2.5 pr-24 rounded-lg border border-[var(--border-primary)] bg-black bg-opacity-40 text-sm font-ui focus:outline-none focus:border-[#007AFF] transition-colors placeholder:text-[var(--text-secondary)]"
-                  disabled={loading}
-                  autoComplete="off"
-                />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                  <kbd className="hidden sm:inline-block px-2 py-1 text-xs font-mono bg-[var(--dark-slate)] border border-[var(--border-slate)] rounded opacity-60">
-                    ⌘K
-                  </kbd>
+            {/* Autocomplete Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-black border border-[#333] rounded-lg overflow-hidden z-50 shadow-2xl">
+                {suggestions.map((suggestion, index) => (
                   <button
-                    type="submit"
-                    className="px-3 py-1 text-xs font-ui font-bold uppercase tracking-wide bg-[#007AFF] bg-opacity-10 text-[#007AFF] rounded hover:bg-opacity-20 transition-all disabled:opacity-50"
-                    disabled={loading}
+                    key={index}
+                    type="button"
+                    onClick={() => handleSelectSuggestion(suggestion)}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white hover:bg-opacity-5 transition-colors text-left"
                   >
-                    {loading ? '...' : '→'}
+                    {suggestion.icon && (
+                      <Image src={suggestion.icon} alt={suggestion.name} width={24} height={24} className="rounded" />
+                    )}
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-white">{suggestion.name}</div>
+                      <div className="text-xs text-gray-500">{suggestion.domain}</div>
+                    </div>
                   </button>
-                </div>
-
-                {/* Autocomplete Dropdown - 2026 Fintech Glassmorphism */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="glass-dropdown absolute top-full left-0 right-0 mt-2 rounded-lg overflow-hidden z-50">
-                    {suggestions.map((suggestion, index) => (
-                      <div
-                        key={index}
-                        onClick={() => handleSelectSuggestion(suggestion)}
-                        className="glass-dropdown-item flex items-center gap-3 px-4 py-3 border-b border-[var(--border-primary)] last:border-b-0"
-                      >
-                        {/* Company Logo */}
-                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1a1a1a] flex items-center justify-center overflow-hidden">
-                          {suggestion.icon ? (
-                            <img
-                              src={suggestion.icon}
-                              alt={suggestion.name}
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full bg-[#333] rounded-full"></div>';
-                              }}
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-[#333] rounded-full"></div>
-                          )}
-                        </div>
-
-                        {/* Company Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-ui font-semibold text-sm text-[var(--text-primary)] truncate">
-                            {suggestion.name}
-                          </div>
-                          <div className="font-ui text-xs text-[var(--text-secondary)] truncate">
-                            {suggestion.domain}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                ))}
               </div>
-            </form>
+            )}
           </div>
 
-          {/* Status Message */}
           {message && (
-            <div className="mt-3 p-2.5 rounded bg-black border border-[var(--border-slate)] font-mono text-xs">
+            <div className="mt-3 p-3 rounded bg-black border border-[#333] text-center text-xs text-gray-400">
               {message}
             </div>
           )}
-        </div>
+        </form>
       </header>
 
-      {/* Main Content Area - Fixed Viewport */}
-      <main className="flex-1 overflow-hidden px-8 pb-6">
-        {/* Intelligence Log - Loading State */}
+      {/* Main Dashboard - 100vh Fixed Grid */}
+      <main className="flex-1 overflow-hidden px-8 py-6">
         {loading && !searchResult && (
-          <div className="h-full flex flex-col">
-            <h2 className="text-lg font-medium opacity-90 mb-6 flex-shrink-0">
-              INTELLIGENCE LOG
-            </h2>
-            <div className="flex-1 overflow-y-auto">
-              <IntelligenceLog />
+          <div className="h-full flex items-center justify-center">
+            <IntelligenceLog />
+          </div>
+        )}
+
+        {searchResult && (
+          <div
+            className="h-full grid gap-6"
+            style={{
+              gridTemplateColumns: '320px 1fr 380px',
+              gridTemplateRows: '1fr',
+              gridTemplateAreas: '"company financial strategy"',
+            }}
+          >
+            {/* Column 1: Company Intelligence (Growth Pillar) */}
+            <div style={{ gridArea: 'company' }} className="overflow-hidden">
+              <CompanyIntelligence
+                companyName={searchResult.company_name}
+                industry={searchResult.industry}
+                revenue={searchResult.revenue}
+                logoUrl={logoUrl}
+              />
+            </div>
+
+            {/* Column 2: Financial Core (Performance Pillar) */}
+            <div style={{ gridArea: 'financial' }} className="overflow-hidden">
+              <FinancialCore companyName={searchResult.company_name} ticker={searchResult.ticker} />
+            </div>
+
+            {/* Column 3: Strategic Ecosystem (People Pillar) */}
+            <div style={{ gridArea: 'strategy' }} className="overflow-hidden">
+              <StrategyEcosystem companyName={searchResult.company_name} executives={targets} />
             </div>
           </div>
         )}
 
-        {/* Company Intelligence - Fixed-Viewport Bento Grid */}
-        {searchResult && (
-          <div className="h-full flex flex-col">
-            {/* 3-Column Bento Grid - Takes Remaining Height */}
-            <div className="flex-1 grid grid-cols-12 gap-6 overflow-hidden">
-              {/* Column 1: Company Summary (3 cols) - Scrollable */}
-              <div className="col-span-3 flex flex-col overflow-hidden">
-                <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
-                  COMPANY INTELLIGENCE
-                </h2>
-                <div className="overflow-y-auto space-y-6 pr-2 flex-1"
-                   style={{
-                     scrollbarWidth: 'thin',
-                     scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
-                   }}>
-                <div className="glass-bento rounded-lg overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-[var(--dark-slate)] px-6 py-4">
-                    <h3 className="text-xl font-bold">
-                      {searchResult.company_name}
-                    </h3>
-                    <p className="text-sm opacity-60 mt-1">
-                      {searchResult.industry} • {searchResult.org_type}
-                    </p>
-                  </div>
-
-                  {/* Operational Focus */}
-                  <div className="border-t border-[var(--border-slate)] bg-black bg-opacity-40 px-6 py-4">
-                    <div className="text-xs opacity-60 uppercase tracking-wider mb-2">Operational Focus</div>
-                    <div className="text-sm leading-snug text-[#e5e7eb]">
-                      {searchResult.operational_focus}
-                    </div>
-                  </div>
-
-                  {/* Key Metrics */}
-                  <div className="p-6 space-y-4">
-                    <div>
-                      <div className="text-xs opacity-60 uppercase tracking-wider mb-1">Org Type</div>
-                      <div className="font-mono text-sm">{searchResult.org_type}</div>
-                    </div>
-                    <div>
-                      <div className="font-mono text-xs opacity-80">{searchResult.hq}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs opacity-60 uppercase tracking-wider mb-1">Revenue</div>
-                      <div className="font-mono text-[#10b981] text-lg">{searchResult.revenue}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs opacity-60 uppercase tracking-wider mb-1">Stature</div>
-                      <div className="font-mono text-sm">{searchResult.stature}</div>
-                    </div>
-                  </div>
-
-                  {/* IT Signal */}
-                  <div className="border-t border-[var(--border-slate)] bg-black bg-opacity-40 px-6 py-4">
-                    <div className="text-xs opacity-60 uppercase tracking-wider mb-2">IT Signal / News</div>
-                    <div className="text-xs leading-relaxed opacity-90 whitespace-pre-line">
-                      {searchResult.it_signal}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hiring Intelligence */}
-                <ErrorBoundary>
-                  <HiringIntelligence companyName={searchResult.company_name} />
-                </ErrorBoundary>
-              </div>
-              </div>
-
-              {/* Column 2: Financials & Pain Signals (6 cols) - Scrollable */}
-              <div className="col-span-6 flex flex-col overflow-hidden">
-                <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
-                  FINANCIAL & REGULATORY
-                </h2>
-                <div className="overflow-y-auto space-y-6 pr-2 flex-1"
-                   style={{
-                     scrollbarWidth: 'thin',
-                     scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
-                   }}>
-                {/* Financial Health */}
-                <ErrorBoundary>
-                  <FinancialHealth companyName={searchResult.company_name} />
-                </ErrorBoundary>
-
-                <div className="glass-bento rounded-lg overflow-hidden">
-                  <div className="p-6">
-                    <ErrorBoundary>
-                      <SECFilings companyName={searchResult.company_name} />
-                    </ErrorBoundary>
-                  </div>
-                </div>
-              </div>
+        {!loading && !searchResult && (
+          <div className="h-full flex flex-col items-center justify-center text-center">
+            <div className="text-[#007AFF] text-4xl font-bold tracking-[0.2em] mb-2">RECON</div>
+            <div className="text-gray-500 text-sm">Sales Intelligence Platform</div>
+            <div className="mt-8 text-gray-600 text-xs uppercase tracking-wider">
+              Enter a company name to begin analysis
             </div>
-
-              {/* Column 3: Key Contacts (3 cols) - Scrollable */}
-              <div className="col-span-3 flex flex-col overflow-hidden">
-                <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
-                  CONTACTS & SENTIMENT
-                </h2>
-                <div className="overflow-y-auto space-y-6 pr-2 flex-1"
-                   style={{
-                     scrollbarWidth: 'thin',
-                     scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
-                   }}>
-                <div className="glass-bento rounded-lg overflow-hidden">
-                  <div className="p-6">
-                    <ErrorBoundary>
-                      <HighValueTargets
-                        companyName={searchResult.company_name}
-                        targets={targets}
-                        loading={targetsLoading}
-                      />
-                    </ErrorBoundary>
-                  </div>
-                </div>
-
-                {/* News & Sentiment */}
-                <ErrorBoundary>
-                  <NewsSentiment companyName={searchResult.company_name} />
-                </ErrorBoundary>
-              </div>
-            </div>
-          </div>
           </div>
         )}
       </main>
