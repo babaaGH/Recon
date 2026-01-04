@@ -291,7 +291,7 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
                             <span>Posted {position.postedDate}</span>
                           </div>
                         </div>
-                        <button className="px-4 py-2 bg-[#007AFF] bg-opacity-10 text-[#007AFF] text-xs font-bold uppercase tracking-wide rounded hover:bg-opacity-20 transition-all">
+                        <button className="px-4 py-2 bg-[#007AFF] text-white text-xs font-bold uppercase tracking-wide rounded hover:bg-[#0066CC] transition-all">
                           View Details
                         </button>
                       </div>
