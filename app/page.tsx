@@ -475,7 +475,6 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              </div>
 
               {/* Column 2: Financials & Regulatory (6 cols) */}
               <div className="col-span-6 flex flex-col">
