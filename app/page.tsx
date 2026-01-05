@@ -7,6 +7,7 @@ import FinancialHealth from '@/components/FinancialHealth';
 import NewsSentiment from '@/components/NewsSentiment';
 import HiringIntelligence from '@/components/HiringIntelligence';
 import LeadershipChanges from '@/components/LeadershipChanges';
+import StockChart from '@/components/StockChart';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import IntelligenceLog from '@/components/IntelligenceLog';
 import Image from 'next/image';
@@ -40,6 +41,58 @@ interface BrandfetchSuggestion {
   brandId?: string;
 }
 
+// Helper function to derive ticker from company name
+const deriveTickerFromCompany = (companyName: string): string => {
+  // Common company ticker mappings
+  const tickerMap: { [key: string]: string } = {
+    'apple': 'AAPL',
+    'microsoft': 'MSFT',
+    'google': 'GOOGL',
+    'alphabet': 'GOOGL',
+    'amazon': 'AMZN',
+    'meta': 'META',
+    'facebook': 'META',
+    'tesla': 'TSLA',
+    'netflix': 'NFLX',
+    'nvidia': 'NVDA',
+    'salesforce': 'CRM',
+    'adobe': 'ADBE',
+    'oracle': 'ORCL',
+    'ibm': 'IBM',
+    'intel': 'INTC',
+    'cisco': 'CSCO',
+    'paypal': 'PYPL',
+    'uber': 'UBER',
+    'airbnb': 'ABNB',
+    'spotify': 'SPOT',
+    'zoom': 'ZM',
+    'shopify': 'SHOP',
+    'square': 'SQ',
+    'block': 'SQ',
+    'stripe': 'STRIPE',
+    'snowflake': 'SNOW',
+    'datadog': 'DDOG',
+    'mongodb': 'MDB',
+    'twilio': 'TWLO',
+    'atlassian': 'TEAM',
+    'servicenow': 'NOW',
+  };
+
+  const normalized = companyName.toLowerCase().replace(/\s+inc\.?$|\s+corp\.?$|\s+corporation$|\s+llc$|\s+ltd\.?$/i, '').trim();
+
+  return tickerMap[normalized] || normalized.substring(0, 4).toUpperCase();
+};
+
+interface StockDataPoint {
+  date: string;
+  timestamp: number;
+  close: number;
+  open: number;
+  high: number;
+  low: number;
+  volume: number;
+}
+
 export default function Home() {
   const [searchResult, setSearchResult] = useState<CompanyIntel | null>(null);
   const [companyName, setCompanyName] = useState('');
@@ -50,6 +103,11 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<BrandfetchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Stock data state
+  const [stockData, setStockData] = useState<StockDataPoint[]>([]);
+  const [stockLoading, setStockLoading] = useState(false);
+  const [ticker, setTicker] = useState('');
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,6 +193,62 @@ export default function Home() {
     };
 
     loadTargets();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchResult]);
+
+  // Fetch stock data when search result is available
+  useEffect(() => {
+    if (!searchResult) {
+      setStockData([]);
+      setTicker('');
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadStockData = async () => {
+      setStockLoading(true);
+
+      // Derive ticker from company name
+      const derivedTicker = deriveTickerFromCompany(searchResult.company_name);
+      setTicker(derivedTicker);
+
+      try {
+        const response = await fetch('/api/stock-price', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ticker: derivedTicker }),
+        });
+
+        if (cancelled) return;
+
+        if (!response.ok) {
+          setStockData([]);
+          return;
+        }
+
+        const data = await response.json();
+        if (!cancelled) {
+          setStockData(data.data || []);
+        }
+      } catch (err) {
+        console.error('Error fetching stock data:', err);
+        if (!cancelled) {
+          setStockData([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setStockLoading(false);
+        }
+      }
+    };
+
+    loadStockData();
 
     return () => {
       cancelled = true;
@@ -380,11 +494,23 @@ export default function Home() {
                      scrollbarWidth: 'thin',
                      scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
                    }}>
-                {/* Financial Health */}
+                {/* Row 1: Financial Health & Sentiment (side by side) */}
+                <div className="grid grid-cols-2 gap-6">
+                  <ErrorBoundary>
+                    <FinancialHealth companyName={searchResult.company_name} />
+                  </ErrorBoundary>
+
+                  <ErrorBoundary>
+                    <NewsSentiment companyName={searchResult.company_name} />
+                  </ErrorBoundary>
+                </div>
+
+                {/* Row 2: Stock Performance */}
                 <ErrorBoundary>
-                  <FinancialHealth companyName={searchResult.company_name} />
+                  <StockChart ticker={ticker} data={stockData} loading={stockLoading} />
                 </ErrorBoundary>
 
+                {/* Row 3: SEC Filings */}
                 <div className="glass-bento rounded-lg overflow-hidden">
                   <div className="p-6">
                     <ErrorBoundary>
@@ -395,10 +521,10 @@ export default function Home() {
               </div>
             </div>
 
-              {/* Column 3: Key Contacts (3 cols) - Scrollable */}
+              {/* Column 3: People & Leadership (3 cols) - Scrollable */}
               <div className="col-span-3 flex flex-col overflow-hidden">
                 <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
-                  CONTACTS & SENTIMENT
+                  PEOPLE & LEADERSHIP
                 </h2>
                 <div className="overflow-y-auto space-y-6 pr-2 flex-1"
                    style={{
@@ -408,11 +534,6 @@ export default function Home() {
                 {/* Leadership Changes */}
                 <ErrorBoundary>
                   <LeadershipChanges companyName={searchResult.company_name} />
-                </ErrorBoundary>
-
-                {/* News & Sentiment */}
-                <ErrorBoundary>
-                  <NewsSentiment companyName={searchResult.company_name} />
                 </ErrorBoundary>
               </div>
             </div>
