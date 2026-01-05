@@ -132,6 +132,7 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
   const [showPainSignals, setShowPainSignals] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const loadSECData = async (forceRefresh = false) => {
     setLoading(true);
@@ -173,18 +174,29 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
     loadSECData(false);
   }, [companyName]);
 
+  // Close modal on Esc key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsModalOpen(false);
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
   if (loading) {
     return (
-      <div className="border border-[var(--border-slate)] rounded-lg p-8 text-center bg-[var(--dark-slate)] bg-opacity-20">
-        <div className="text-sm opacity-60">[ ANALYZING SEC FILINGS... ]</div>
+      <div className="border border-[var(--border-primary)] rounded-lg p-4 bg-black bg-opacity-40">
+        <div className="label-caps opacity-60 mb-2">Regulatory Filings</div>
+        <div className="text-sm opacity-60">Loading...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="border border-[var(--border-slate)] rounded-lg p-8 text-center bg-[var(--dark-slate)] bg-opacity-20">
-        <div className="text-sm opacity-60">NOT A PUBLIC COMPANY</div>
+      <div className="border border-[var(--border-primary)] rounded-lg p-4 bg-black bg-opacity-40">
+        <div className="label-caps opacity-60 mb-2">Regulatory Filings</div>
+        <div className="text-sm text-[var(--text-secondary)]">NOT A PUBLIC COMPANY</div>
         <div className="text-xs opacity-40 mt-2">{error}</div>
       </div>
     );
