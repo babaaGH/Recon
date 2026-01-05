@@ -228,7 +228,7 @@ export default function Home() {
                   </kbd>
                   <button
                     type="submit"
-                    className="px-3 py-1 text-xs font-ui font-bold uppercase tracking-wide bg-[#007AFF] bg-opacity-10 text-[#007AFF] rounded hover:bg-opacity-20 transition-all disabled:opacity-50"
+                    className="px-3 py-1 text-xs font-ui font-bold uppercase tracking-wide bg-[#007AFF] text-white rounded hover:bg-[#0055CC] transition-all disabled:opacity-50"
                     disabled={loading}
                   >
                     {loading ? '...' : '→'}

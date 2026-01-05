@@ -251,8 +251,9 @@ export default function LeadershipChanges({ companyName }: LeadershipChangesProp
                               href={hire.linkedinUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-4 py-2 bg-[#007AFF] text-white text-xs font-bold uppercase tracking-wide rounded hover:bg-[#0066CC] transition-all"
+                              className="px-4 py-2 bg-[#007AFF] text-white text-xs font-bold uppercase tracking-wide rounded hover:bg-[#0055CC] transition-all flex-shrink-0"
                               onClick={(e) => e.stopPropagation()}
+                              style={{ backgroundColor: '#007AFF', color: '#FFFFFF' }}
                             >
                               View Profile
                             </a>
