@@ -44,6 +44,46 @@ interface BrandfetchSuggestion {
   brandId?: string;
 }
 
+// Helper function to derive company website from name
+const deriveWebsiteFromCompany = (companyName: string): string => {
+  const websiteMap: { [key: string]: string } = {
+    'apple': 'https://www.apple.com',
+    'microsoft': 'https://www.microsoft.com',
+    'google': 'https://www.google.com',
+    'alphabet': 'https://abc.xyz',
+    'amazon': 'https://www.amazon.com',
+    'meta': 'https://about.meta.com',
+    'facebook': 'https://about.meta.com',
+    'tesla': 'https://www.tesla.com',
+    'netflix': 'https://www.netflix.com',
+    'nvidia': 'https://www.nvidia.com',
+    'salesforce': 'https://www.salesforce.com',
+    'adobe': 'https://www.adobe.com',
+    'oracle': 'https://www.oracle.com',
+    'ibm': 'https://www.ibm.com',
+    'intel': 'https://www.intel.com',
+    'cisco': 'https://www.cisco.com',
+    'paypal': 'https://www.paypal.com',
+    'uber': 'https://www.uber.com',
+    'airbnb': 'https://www.airbnb.com',
+    'spotify': 'https://www.spotify.com',
+    'zoom': 'https://zoom.us',
+    'shopify': 'https://www.shopify.com',
+    'square': 'https://squareup.com',
+    'block': 'https://block.xyz',
+    'snowflake': 'https://www.snowflake.com',
+    'datadog': 'https://www.datadoghq.com',
+    'mongodb': 'https://www.mongodb.com',
+    'twilio': 'https://www.twilio.com',
+    'atlassian': 'https://www.atlassian.com',
+    'servicenow': 'https://www.servicenow.com',
+  };
+
+  const normalized = companyName.toLowerCase().replace(/\s+inc\.?$|\s+corp\.?$|\s+corporation$|\s+llc$|\s+ltd\.?$/i, '').trim();
+
+  return websiteMap[normalized] || `https://www.${normalized.replace(/\s+/g, '')}.com`;
+};
+
 // Helper function to derive ticker from company name
 const deriveTickerFromCompany = (companyName: string): string => {
   // Common company ticker mappings
@@ -431,9 +471,15 @@ export default function Home() {
                 <div className="glass-bento rounded-lg overflow-hidden flex-1">
                   {/* Header */}
                   <div className="bg-[var(--dark-slate)] px-6 py-4">
-                    <h3 className="text-xl font-bold">
+                    <a
+                      href={deriveWebsiteFromCompany(searchResult.company_name)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xl font-bold hover:text-[#007AFF] transition-colors inline-flex items-center gap-2"
+                    >
                       {searchResult.company_name}
-                    </h3>
+                      <span className="text-sm opacity-60">↗</span>
+                    </a>
                     <p className="text-sm opacity-60 mt-1">
                       {searchResult.industry} • {searchResult.org_type}
                     </p>
@@ -477,11 +523,15 @@ export default function Home() {
               </div>
 
               {/* Column 2: Financials & Regulatory (6 cols) */}
-              <div className="col-span-6 flex flex-col">
+              <div className="col-span-6 flex flex-col overflow-hidden">
                 <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
                   FINANCIAL & REGULATORY
                 </h2>
-                <div className="space-y-6 flex-1">
+                <div className="space-y-6 flex-1 overflow-y-auto pr-2"
+                   style={{
+                     scrollbarWidth: 'thin',
+                     scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
+                   }}>
                 {/* Row 1: Financial Health & Sentiment (side by side) */}
                 <div className="grid grid-cols-2 gap-6">
                   <ErrorBoundary>
@@ -510,11 +560,15 @@ export default function Home() {
             </div>
 
               {/* Column 3: People & Networking (3 cols) */}
-              <div className="col-span-3 flex flex-col">
+              <div className="col-span-3 flex flex-col overflow-hidden">
                 <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
                   PEOPLE & NETWORKING
                 </h2>
-                <div className="grid grid-rows-5 gap-4 flex-1">
+                <div className="space-y-4 flex-1 overflow-y-auto pr-2"
+                   style={{
+                     scrollbarWidth: 'thin',
+                     scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
+                   }}>
                 {/* Leadership Changes */}
                 <ErrorBoundary>
                   <LeadershipChanges companyName={searchResult.company_name} />

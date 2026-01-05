@@ -74,40 +74,34 @@ export default function FinancialHealth({ companyName, metrics }: FinancialHealt
         onClick={() => setIsModalOpen(true)}
         className="border border-[var(--border-primary)] rounded-lg p-4 bg-black bg-opacity-40 hover:border-[#007AFF] transition-all cursor-pointer"
       >
-        <div className="flex items-center justify-between gap-6">
-          {/* Health Score */}
+        <div className="flex items-center justify-between gap-4">
+          {/* Left: Score & Status */}
           <div>
-            <div className="label-caps opacity-60 mb-1">Financial Health Score</div>
-            <div className="font-mono-data text-3xl" style={{ color: statusColor, letterSpacing: '0.02em' }}>
+            <div className="label-caps opacity-60 mb-1">Financial Health</div>
+            <div className="font-mono-data text-3xl text-white" style={{ letterSpacing: '0.02em' }}>
               {healthScore}
             </div>
-            <div className="mt-2">
-              <span className="inline-block px-3 py-1 rounded text-xs font-ui font-bold" style={{
-                backgroundColor: `${statusColor}20`,
-                color: statusColor
-              }}>
-                {status}
-              </span>
+            <div className="mt-2 text-xs text-gray-400">
+              Health Score
             </div>
           </div>
 
-          {/* 6-Month Sparkline */}
-          <div className="flex-1 max-w-xs">
-            <div className="label-caps opacity-60 mb-2">6-Month Trend</div>
-            <ResponsiveContainer width="100%" height={60}>
-              <LineChart data={sparklineData}>
-                <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke={statusColor}
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          {/* Middle: Status Breakdown */}
+          <div className="flex-1">
+            <div className="label-caps opacity-60 mb-2">Status</div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[var(--text-secondary)]">Rating</span>
+                <span className="font-mono font-semibold" style={{ color: statusColor }}>{status}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[var(--text-secondary)]">Metrics</span>
+                <span className="font-mono font-semibold text-white">{displayMetrics.length}</span>
+              </div>
+            </div>
           </div>
 
-          {/* Expand Icon */}
+          {/* Right: Expand Icon */}
           <div className="text-[#007AFF] text-xl">→</div>
         </div>
       </div>
