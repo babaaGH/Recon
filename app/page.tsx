@@ -7,6 +7,9 @@ import FinancialHealth from '@/components/FinancialHealth';
 import NewsSentiment from '@/components/NewsSentiment';
 import HiringIntelligence from '@/components/HiringIntelligence';
 import LeadershipChanges from '@/components/LeadershipChanges';
+import NetworkingEvents from '@/components/NetworkingEvents';
+import ExecutiveSocialActivity from '@/components/ExecutiveSocialActivity';
+import CommunityCSR from '@/components/CommunityCSR';
 import StockChart from '@/components/StockChart';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import IntelligenceLog from '@/components/IntelligenceLog';
@@ -476,11 +479,6 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-
-                {/* Hiring Intelligence */}
-                <ErrorBoundary>
-                  <HiringIntelligence companyName={searchResult.company_name} />
-                </ErrorBoundary>
               </div>
               </div>
 
@@ -521,10 +519,10 @@ export default function Home() {
               </div>
             </div>
 
-              {/* Column 3: People & Leadership (3 cols) - Scrollable */}
+              {/* Column 3: People & Networking (3 cols) - Scrollable */}
               <div className="col-span-3 flex flex-col overflow-hidden">
                 <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
-                  PEOPLE & LEADERSHIP
+                  PEOPLE & NETWORKING
                 </h2>
                 <div className="overflow-y-auto space-y-6 pr-2 flex-1"
                    style={{
@@ -534,6 +532,26 @@ export default function Home() {
                 {/* Leadership Changes */}
                 <ErrorBoundary>
                   <LeadershipChanges companyName={searchResult.company_name} />
+                </ErrorBoundary>
+
+                {/* Networking & Events */}
+                <ErrorBoundary>
+                  <NetworkingEvents companyName={searchResult.company_name} />
+                </ErrorBoundary>
+
+                {/* Hiring Intelligence */}
+                <ErrorBoundary>
+                  <HiringIntelligence companyName={searchResult.company_name} />
+                </ErrorBoundary>
+
+                {/* Executive Social Activity */}
+                <ErrorBoundary>
+                  <ExecutiveSocialActivity companyName={searchResult.company_name} />
+                </ErrorBoundary>
+
+                {/* Community & CSR */}
+                <ErrorBoundary>
+                  <CommunityCSR companyName={searchResult.company_name} />
                 </ErrorBoundary>
               </div>
             </div>
