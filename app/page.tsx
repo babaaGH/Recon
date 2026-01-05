@@ -422,18 +422,13 @@ export default function Home() {
         {searchResult && (
           <div className="h-full flex flex-col">
             {/* 3-Column Bento Grid - Takes Remaining Height */}
-            <div className="flex-1 grid grid-cols-12 gap-6 overflow-hidden">
-              {/* Column 1: Company Summary (3 cols) - Scrollable */}
-              <div className="col-span-3 flex flex-col overflow-hidden">
+            <div className="flex-1 grid grid-cols-12 gap-6">
+              {/* Column 1: Company Summary (3 cols) */}
+              <div className="col-span-3 flex flex-col">
                 <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
                   COMPANY INTELLIGENCE
                 </h2>
-                <div className="overflow-y-auto space-y-6 pr-2 flex-1"
-                   style={{
-                     scrollbarWidth: 'thin',
-                     scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
-                   }}>
-                <div className="glass-bento rounded-lg overflow-hidden">
+                <div className="glass-bento rounded-lg overflow-hidden flex-1">
                   {/* Header */}
                   <div className="bg-[var(--dark-slate)] px-6 py-4">
                     <h3 className="text-xl font-bold">
@@ -482,16 +477,12 @@ export default function Home() {
               </div>
               </div>
 
-              {/* Column 2: Financials & Pain Signals (6 cols) - Scrollable */}
-              <div className="col-span-6 flex flex-col overflow-hidden">
+              {/* Column 2: Financials & Regulatory (6 cols) */}
+              <div className="col-span-6 flex flex-col">
                 <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
                   FINANCIAL & REGULATORY
                 </h2>
-                <div className="overflow-y-auto space-y-6 pr-2 flex-1"
-                   style={{
-                     scrollbarWidth: 'thin',
-                     scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
-                   }}>
+                <div className="space-y-6 flex-1">
                 {/* Row 1: Financial Health & Sentiment (side by side) */}
                 <div className="grid grid-cols-2 gap-6">
                   <ErrorBoundary>
@@ -519,16 +510,12 @@ export default function Home() {
               </div>
             </div>
 
-              {/* Column 3: People & Networking (3 cols) - Scrollable */}
-              <div className="col-span-3 flex flex-col overflow-hidden">
+              {/* Column 3: People & Networking (3 cols) */}
+              <div className="col-span-3 flex flex-col">
                 <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
                   PEOPLE & NETWORKING
                 </h2>
-                <div className="overflow-y-auto space-y-6 pr-2 flex-1"
-                   style={{
-                     scrollbarWidth: 'thin',
-                     scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
-                   }}>
+                <div className="grid grid-rows-5 gap-4 flex-1">
                 {/* Leadership Changes */}
                 <ErrorBoundary>
                   <LeadershipChanges companyName={searchResult.company_name} />

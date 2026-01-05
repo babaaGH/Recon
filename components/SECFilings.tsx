@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { getTimeAgo } from '@/lib/utils';
-import StockChart from './StockChart';
 
 interface LegalProceeding {
   description: string;
@@ -123,16 +122,6 @@ function getFilingURL(cik: string, accessionNumber: string): string {
   return `https://www.sec.gov/cgi-bin/viewer?action=view&cik=${cik}&accession_number=${accessionNumber}&xbrl_type=v`;
 }
 
-interface StockDataPoint {
-  date: string;
-  timestamp: number;
-  close: number;
-  open: number;
-  high: number;
-  low: number;
-  volume: number;
-}
-
 export default function SECFilings({ companyName }: SECFilingsProps) {
   const [secData, setSecData] = useState<SECData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -143,8 +132,6 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
   const [showPainSignals, setShowPainSignals] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
-  const [stockData, setStockData] = useState<StockDataPoint[]>([]);
-  const [stockLoading, setStockLoading] = useState(false);
 
   const loadSECData = async (forceRefresh = false) => {
     setLoading(true);
@@ -185,56 +172,6 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
   useEffect(() => {
     loadSECData(false);
   }, [companyName]);
-
-  // Fetch stock data when SEC data is available
-  useEffect(() => {
-    if (!secData?.ticker) {
-      setStockData([]);
-      return;
-    }
-
-    let cancelled = false;
-
-    const loadStockData = async () => {
-      setStockLoading(true);
-
-      try {
-        const response = await fetch('/api/stock-price', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ticker: secData.ticker }),
-        });
-
-        if (cancelled) return;
-
-        if (!response.ok) {
-          setStockData([]);
-          return;
-        }
-
-        const data = await response.json();
-        if (!cancelled) {
-          setStockData(data.data || []);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setStockData([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setStockLoading(false);
-        }
-      }
-    };
-
-    loadStockData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [secData?.ticker]);
 
   if (loading) {
     return (
@@ -333,15 +270,6 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Stock Price Chart */}
-      {secData.ticker && (
-        <StockChart
-          ticker={secData.ticker}
-          data={stockData}
-          loading={stockLoading}
-        />
-      )}
-
       {/* Cache Status & Refresh Controls */}
       <div className="flex items-center justify-between gap-4 px-4 py-3 border border-[var(--border-slate)] rounded-lg bg-black bg-opacity-30">
         <div className="flex items-center gap-3">
