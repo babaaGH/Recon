@@ -280,8 +280,96 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
 
   const ratios = calculateRatios(secData?.financials);
 
+  // Count key stats for collapsed view
+  const filingsCount = (secData.latest10K ? 1 : 0) + (secData.latest10Q ? 1 : 0);
+  const legalCases = secData.legalExposure?.totalCases || 0;
+  const riskLevel = secData.legalExposure?.riskLevel || 'LOW';
+  const totalExposure = secData.legalExposure?.totalExposureFormatted || '$0';
+
+  const getRiskColor = (level: string) => {
+    switch (level) {
+      case 'CRITICAL': return '#ef4444';
+      case 'HIGH': return '#f59e0b';
+      case 'MEDIUM': return '#3b82f6';
+      case 'LOW': return '#10b981';
+      default: return '#6b7280';
+    }
+  };
+
+  const riskColor = getRiskColor(riskLevel);
+
   return (
-    <div className="space-y-6">
+    <>
+      {/* Collapsed Summary - Clickable */}
+      <div
+        onClick={() => setIsModalOpen(true)}
+        className="border border-[var(--border-primary)] rounded-lg p-4 bg-black bg-opacity-40 hover:border-[#007AFF] transition-all cursor-pointer"
+      >
+        <div className="flex items-center justify-between gap-4">
+          {/* Left: Filings Count */}
+          <div>
+            <div className="label-caps opacity-60 mb-1">SEC Filings</div>
+            <div className="font-mono-data text-3xl text-white" style={{ letterSpacing: '0.02em' }}>
+              {filingsCount}
+            </div>
+            <div className="mt-2 text-xs text-gray-400">
+              Recent Filings
+            </div>
+          </div>
+
+          {/* Middle: Legal & Risk */}
+          <div className="flex-1">
+            <div className="label-caps opacity-60 mb-2">Legal Status</div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[var(--text-secondary)]">Cases</span>
+                <span className="font-mono font-semibold text-white">{legalCases}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[var(--text-secondary)]">Risk</span>
+                <span className="font-mono font-semibold" style={{ color: riskColor }}>{riskLevel}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Expand Icon */}
+          <div className="text-[#007AFF] text-xl">→</div>
+        </div>
+      </div>
+
+      {/* Modal Overlay - Full Details */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-8"
+          style={{ backdropFilter: 'blur(10px)' }}
+          onClick={() => setIsModalOpen(false)}
+        >
+          {/* Modal Container */}
+          <div
+            className="bg-[#000000] border border-[#333333] rounded-lg max-w-7xl w-full max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="border-b border-[#333333] p-6 flex items-center justify-between">
+              <div>
+                <h3 className="font-ui text-xl font-semibold text-[#E0E0E0]">
+                  REGULATORY FILINGS & DISCLOSURES
+                </h3>
+                <p className="font-ui text-sm text-[var(--text-secondary)] mt-1">
+                  {secData.companyName} • {filingsCount} Filings • {legalCases} Legal Cases
+                </p>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-[var(--text-secondary)] hover:text-[#E0E0E0] text-2xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body - Scrollable */}
+            <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+    <div className="space-y-6 p-6">
       {/* Cache Status & Refresh Controls */}
       <div className="flex items-center justify-between gap-4 px-4 py-3 border border-[var(--border-slate)] rounded-lg bg-black bg-opacity-30">
         <div className="flex items-center gap-3">
@@ -1300,5 +1388,10 @@ export default function SECFilings({ companyName }: SECFilingsProps) {
         </div>
       )}
     </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
