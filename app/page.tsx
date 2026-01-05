@@ -6,6 +6,7 @@ import SECFilings from '@/components/SECFilings';
 import FinancialHealth from '@/components/FinancialHealth';
 import NewsSentiment from '@/components/NewsSentiment';
 import HiringIntelligence from '@/components/HiringIntelligence';
+import LeadershipChanges from '@/components/LeadershipChanges';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import IntelligenceLog from '@/components/IntelligenceLog';
 import Image from 'next/image';
@@ -404,17 +405,10 @@ export default function Home() {
                      scrollbarWidth: 'thin',
                      scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
                    }}>
-                <div className="glass-bento rounded-lg overflow-hidden">
-                  <div className="p-6">
-                    <ErrorBoundary>
-                      <HighValueTargets
-                        companyName={searchResult.company_name}
-                        targets={targets}
-                        loading={targetsLoading}
-                      />
-                    </ErrorBoundary>
-                  </div>
-                </div>
+                {/* Leadership Changes */}
+                <ErrorBoundary>
+                  <LeadershipChanges companyName={searchResult.company_name} />
+                </ErrorBoundary>
 
                 {/* News & Sentiment */}
                 <ErrorBoundary>
