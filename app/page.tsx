@@ -462,13 +462,17 @@ export default function Home() {
         {searchResult && (
           <div className="h-full flex flex-col">
             {/* 3-Column Bento Grid - Takes Remaining Height */}
-            <div className="flex-1 grid grid-cols-12 gap-6">
+            <div className="flex-1 grid grid-cols-12 gap-6 overflow-hidden">
               {/* Column 1: Company Summary (3 cols) */}
-              <div className="col-span-3 flex flex-col">
+              <div className="col-span-3 flex flex-col overflow-hidden">
                 <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
                   COMPANY INTELLIGENCE
                 </h2>
-                <div className="glass-bento rounded-lg overflow-hidden flex-1">
+                <div className="glass-bento rounded-lg overflow-y-auto flex-1 pr-2"
+                   style={{
+                     scrollbarWidth: 'thin',
+                     scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
+                   }}>
                   {/* Header */}
                   <div className="bg-[var(--dark-slate)] px-6 py-4">
                     <a
