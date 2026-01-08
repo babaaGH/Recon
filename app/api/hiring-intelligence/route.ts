@@ -7,9 +7,24 @@ interface JobOpening {
   posted_date?: string;
 }
 
-interface PredictLeadsResponse {
-  jobs: JobOpening[];
-  total: number;
+interface AdzunaJob {
+  title: string;
+  description: string;
+  location: {
+    display_name: string;
+  };
+  created: string;
+  category: {
+    label: string;
+  };
+  company: {
+    display_name: string;
+  };
+}
+
+interface AdzunaResponse {
+  results: AdzunaJob[];
+  count: number;
 }
 
 // Generate realistic mock hiring data
@@ -39,10 +54,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company name required' }, { status: 400 });
     }
 
-    const PREDICTLEADS_API_KEY = process.env.PREDICTLEADS_API_KEY;
+    const ADZUNA_APP_ID = process.env.ADZUNA_APP_ID;
+    const ADZUNA_API_KEY = process.env.ADZUNA_API_KEY;
 
-    if (!PREDICTLEADS_API_KEY) {
-      console.log('PREDICTLEADS_API_KEY not configured, returning mock data');
+    if (!ADZUNA_APP_ID || !ADZUNA_API_KEY) {
+      console.log('Adzuna API credentials not configured, returning mock data');
       // Return realistic mock data for demo purposes
       const mockData = generateMockHiringData(companyName);
       return NextResponse.json(mockData);
@@ -50,36 +66,37 @@ export async function POST(request: NextRequest) {
 
     console.log(`Fetching job openings for: ${companyName}`);
 
-    // PredictLeads API endpoint for job openings
-    const url = `https://api.predictleads.com/job-openings?company=${encodeURIComponent(companyName)}`;
+    // Adzuna API endpoint for job search (using US as default country)
+    // Search for jobs from the specific company
+    const url = `https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_API_KEY}&results_per_page=100&company=${encodeURIComponent(companyName)}`;
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${PREDICTLEADS_API_KEY}`,
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      console.error(`PredictLeads API error: ${response.status} ${response.statusText}`);
+      console.error(`Adzuna API error: ${response.status} ${response.statusText}`);
 
       // Return realistic mock data as fallback
       const mockData = generateMockHiringData(companyName);
       return NextResponse.json(mockData);
     }
 
-    const data: PredictLeadsResponse = await response.json();
+    const data: AdzunaResponse = await response.json();
 
     // Categorize jobs by department
     let engineering = 0;
     let sales = 0;
     let marketing = 0;
 
-    if (data.jobs && Array.isArray(data.jobs)) {
-      data.jobs.forEach((job: JobOpening) => {
+    if (data.results && Array.isArray(data.results)) {
+      data.results.forEach((job: AdzunaJob) => {
         const title = (job.title || '').toLowerCase();
-        const dept = (job.department || '').toLowerCase();
+        const description = (job.description || '').toLowerCase();
+        const category = (job.category?.label || '').toLowerCase();
 
         // Engineering keywords
         if (
@@ -89,9 +106,13 @@ export async function POST(request: NextRequest) {
           title.includes('devops') ||
           title.includes('architect') ||
           title.includes('technical') ||
-          dept.includes('engineering') ||
-          dept.includes('technology') ||
-          dept.includes('it')
+          title.includes('programmer') ||
+          title.includes('qa') ||
+          title.includes('quality assurance') ||
+          category.includes('it') ||
+          category.includes('engineering') ||
+          category.includes('software') ||
+          category.includes('technology')
         ) {
           engineering++;
         }
@@ -101,8 +122,9 @@ export async function POST(request: NextRequest) {
           title.includes('account executive') ||
           title.includes('business development') ||
           title.includes('account manager') ||
-          dept.includes('sales') ||
-          dept.includes('business development')
+          title.includes('bdr') ||
+          title.includes('sdr') ||
+          category.includes('sales')
         ) {
           sales++;
         }
@@ -113,14 +135,16 @@ export async function POST(request: NextRequest) {
           title.includes('brand') ||
           title.includes('content') ||
           title.includes('digital') ||
-          dept.includes('marketing')
+          title.includes('seo') ||
+          title.includes('social media') ||
+          category.includes('marketing')
         ) {
           marketing++;
         }
       });
     }
 
-    console.log(`✓ Categorized ${data.jobs?.length || 0} job openings: Engineering=${engineering}, Sales=${sales}, Marketing=${marketing}`);
+    console.log(`✓ Categorized ${data.results?.length || 0} job openings from Adzuna: Engineering=${engineering}, Sales=${sales}, Marketing=${marketing}`);
 
     return NextResponse.json({
       engineering,

@@ -312,3 +312,4 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
     </>
   );
 }
+

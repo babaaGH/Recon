@@ -9,6 +9,36 @@ interface Event {
   description?: string;
 }
 
+interface EventbriteEvent {
+  name: {
+    text: string;
+  };
+  description: {
+    text: string;
+  };
+  start: {
+    local: string;
+  };
+  venue?: {
+    address: {
+      city?: string;
+      region?: string;
+      country?: string;
+    };
+  };
+  online_event: boolean;
+  category?: {
+    name: string;
+  };
+}
+
+interface EventbriteResponse {
+  events: EventbriteEvent[];
+  pagination: {
+    object_count: number;
+  };
+}
+
 // Generate realistic mock networking events data
 function generateMockEventsData(companyName: string): Event[] {
   const seed = companyName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -183,6 +213,54 @@ function generateMockEventsData(companyName: string): Event[] {
   return events;
 }
 
+// Helper function to categorize Eventbrite events into our event types
+function categorizeEventbriteEvent(event: EventbriteEvent): Pick<Event, 'type' | 'role'> {
+  const name = (event.name?.text || '').toLowerCase();
+  const description = (event.description?.text || '').toLowerCase();
+  const category = (event.category?.name || '').toLowerCase();
+
+  // Determine event type
+  let type: Event['type'] = 'Conference';
+  if (
+    category.includes('seminar') ||
+    category.includes('webinar') ||
+    name.includes('webinar') ||
+    event.online_event
+  ) {
+    type = 'Webinar';
+  } else if (
+    name.includes('trade show') ||
+    name.includes('expo') ||
+    category.includes('trade')
+  ) {
+    type = 'Trade Show';
+  } else if (
+    name.includes('roundtable') ||
+    name.includes('panel') ||
+    category.includes('networking')
+  ) {
+    type = 'Roundtable';
+  } else if (description.includes('speaking') || name.includes('speaker')) {
+    type = 'Speaking';
+  } else if (description.includes('sponsor') || name.includes('sponsor')) {
+    type = 'Sponsorship';
+  }
+
+  // Determine role (simplified)
+  let role: Event['role'] = 'Attendee';
+  if (description.includes('sponsor')) {
+    role = 'Sponsor';
+  } else if (description.includes('speaking') || description.includes('speaker')) {
+    role = 'Speaker';
+  } else if (description.includes('exhibitor') || description.includes('booth')) {
+    role = 'Exhibitor';
+  } else if (description.includes('host')) {
+    role = 'Host';
+  }
+
+  return { type, role };
+}
+
 export async function POST(request: NextRequest) {
   let companyName = '';
 
@@ -190,9 +268,86 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     companyName = body.companyName || '';
 
-    // For now, return mock data
-    // In production, this would integrate with event platforms, company websites, etc.
-    const events = generateMockEventsData(companyName);
+    const EVENTBRITE_API_KEY = process.env.EVENTBRITE_API_KEY;
+
+    if (!EVENTBRITE_API_KEY) {
+      console.log('Eventbrite API key not configured, returning mock data');
+      const events = generateMockEventsData(companyName);
+      return NextResponse.json({
+        events,
+        total: events.length
+      });
+    }
+
+    console.log(`Fetching events for: ${companyName}`);
+
+    // Eventbrite API endpoint for event search
+    const url = `https://www.eventbriteapi.com/v3/events/search/?q=${encodeURIComponent(companyName)}&token=${EVENTBRITE_API_KEY}&expand=venue,category`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Eventbrite API error: ${response.status} ${response.statusText}`);
+      // Return mock data as fallback
+      const events = generateMockEventsData(companyName);
+      return NextResponse.json({
+        events,
+        total: events.length
+      });
+    }
+
+    const data: EventbriteResponse = await response.json();
+
+    // Transform Eventbrite events to our format
+    const events: Event[] = [];
+
+    if (data.events && Array.isArray(data.events)) {
+      data.events.forEach((ebEvent: EventbriteEvent) => {
+        const { type, role } = categorizeEventbriteEvent(ebEvent);
+
+        // Format location
+        let location = 'Virtual Event';
+        if (!ebEvent.online_event && ebEvent.venue?.address) {
+          const addr = ebEvent.venue.address;
+          const parts = [addr.city, addr.region, addr.country].filter(Boolean);
+          location = parts.join(', ') || 'TBA';
+        }
+
+        // Format date
+        const eventDate = new Date(ebEvent.start.local);
+        const formattedDate = eventDate.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+
+        events.push({
+          name: ebEvent.name?.text || 'Untitled Event',
+          type,
+          date: formattedDate,
+          location,
+          role,
+          description: ebEvent.description?.text?.substring(0, 150) || undefined
+        });
+      });
+    }
+
+    // If no real events found, fallback to mock data
+    if (events.length === 0) {
+      console.log('No Eventbrite events found, returning mock data');
+      const mockEvents = generateMockEventsData(companyName);
+      return NextResponse.json({
+        events: mockEvents,
+        total: mockEvents.length
+      });
+    }
+
+    console.log(`✓ Found ${events.length} events from Eventbrite for ${companyName}`);
 
     return NextResponse.json({
       events,

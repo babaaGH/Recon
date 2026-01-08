@@ -7,6 +7,101 @@ interface NewsItem {
   impact: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 
+interface NewsAPIArticle {
+  title: string;
+  description: string;
+  publishedAt: string;
+  source: {
+    name: string;
+  };
+  content?: string;
+}
+
+interface NewsAPIResponse {
+  status: string;
+  totalResults: number;
+  articles: NewsAPIArticle[];
+}
+
+// Helper function to categorize news and determine impact
+function categorizeNews(article: NewsAPIArticle): Pick<NewsItem, 'category' | 'impact'> {
+  const title = (article.title || '').toLowerCase();
+  const description = (article.description || '').toLowerCase();
+  const content = (article.content || '').toLowerCase();
+  const combined = `${title} ${description} ${content}`;
+
+  let category = 'News';
+  let impact: NewsItem['impact'] = 'MEDIUM';
+
+  // High impact keywords
+  const highImpactKeywords = [
+    'acquisition',
+    'merger',
+    'ipo',
+    'funding',
+    'expansion',
+    'partnership',
+    'layoff',
+    'ceo',
+    'bankruptcy',
+    'lawsuit',
+    'billion',
+    'strategic'
+  ];
+
+  // Category detection
+  if (combined.match(/acquisition|acquire|bought|purchase/)) {
+    category = 'Acquisition';
+    impact = 'HIGH';
+  } else if (combined.match(/merger|merge/)) {
+    category = 'Merger';
+    impact = 'HIGH';
+  } else if (combined.match(/expansion|expand|new market|international/)) {
+    category = 'Expansion';
+    impact = 'HIGH';
+  } else if (combined.match(/partnership|partner|collaborate|alliance/)) {
+    category = 'Partnership';
+    impact = 'HIGH';
+  } else if (combined.match(/funding|investment|raised|series [a-z]/)) {
+    category = 'Funding';
+    impact = 'HIGH';
+  } else if (combined.match(/ipo|public offering|stock/)) {
+    category = 'IPO';
+    impact = 'HIGH';
+  } else if (combined.match(/product|launch|release|announce/)) {
+    category = 'Product';
+    impact = 'MEDIUM';
+  } else if (combined.match(/revenue|earnings|profit|financial/)) {
+    category = 'Financial';
+    impact = 'MEDIUM';
+  } else if (combined.match(/client|customer|contract|deal/)) {
+    category = 'Client Win';
+    impact = 'MEDIUM';
+  } else if (combined.match(/layoff|restructure|downsize/)) {
+    category = 'Restructuring';
+    impact = 'HIGH';
+  } else if (combined.match(/ceo|executive|leadership|appoint/)) {
+    category = 'Leadership';
+    impact = 'MEDIUM';
+  } else if (combined.match(/lawsuit|legal|court|settle/)) {
+    category = 'Legal';
+    impact = 'HIGH';
+  }
+
+  // Override impact based on keywords
+  const hasHighImpact = highImpactKeywords.some(keyword => combined.includes(keyword));
+  if (hasHighImpact && impact === 'MEDIUM') {
+    impact = 'HIGH';
+  }
+
+  // Low impact for minor news
+  if (combined.match(/update|minor|small/)) {
+    impact = 'LOW';
+  }
+
+  return { category, impact };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { companyName } = await request.json();
@@ -15,10 +110,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company name required' }, { status: 400 });
     }
 
-    const PREDICTLEADS_API_KEY = process.env.PREDICTLEADS_API_KEY;
+    const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
-    if (!PREDICTLEADS_API_KEY) {
-      console.log('PREDICTLEADS_API_KEY not configured, returning mock data');
+    if (!NEWS_API_KEY) {
+      console.log('NEWS_API_KEY not configured, returning mock data');
       // Return mock data for testing
       return NextResponse.json({
         news: [
@@ -46,19 +141,23 @@ export async function POST(request: NextRequest) {
 
     console.log(`Fetching strategic news for: ${companyName}`);
 
-    // PredictLeads API endpoint for strategic events
-    const url = `https://api.predictleads.com/strategic-events?company=${encodeURIComponent(companyName)}`;
+    // NewsAPI.org endpoint for everything
+    // Get news from the last 30 days, sorted by most recent
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const fromDate = thirtyDaysAgo.toISOString().split('T')[0];
+
+    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(companyName)}&from=${fromDate}&sortBy=publishedAt&language=en&apiKey=${NEWS_API_KEY}`;
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${PREDICTLEADS_API_KEY}`,
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      console.error(`PredictLeads API error: ${response.status} ${response.statusText}`);
+      console.error(`NewsAPI error: ${response.status} ${response.statusText}`);
       // Return mock data as fallback
       return NextResponse.json({
         news: [
@@ -72,31 +171,29 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const data = await response.json();
+    const data: NewsAPIResponse = await response.json();
 
-    // Transform PredictLeads response to our format
+    // Transform NewsAPI response to our format
     const news: NewsItem[] = [];
 
-    if (data.events && Array.isArray(data.events)) {
-      data.events.forEach((event: any) => {
-        // Determine impact level
-        let impact: 'HIGH' | 'MEDIUM' | 'LOW' = 'MEDIUM';
-        if (event.impact === 'high' || event.category === 'expansion' || event.category === 'acquisition') {
-          impact = 'HIGH';
-        } else if (event.impact === 'low') {
-          impact = 'LOW';
-        }
+    if (data.articles && Array.isArray(data.articles)) {
+      data.articles.forEach((article: NewsAPIArticle) => {
+        const { category, impact } = categorizeNews(article);
+
+        // Format date
+        const articleDate = new Date(article.publishedAt);
+        const formattedDate = articleDate.toISOString().split('T')[0];
 
         news.push({
-          title: event.title || event.description,
-          date: event.date || new Date().toISOString().split('T')[0],
-          category: event.category || 'Other',
+          title: article.title,
+          date: formattedDate,
+          category,
           impact,
         });
       });
     }
 
-    console.log(`✓ Found ${news.length} strategic events for ${companyName}`);
+    console.log(`✓ Found ${news.length} news articles from NewsAPI for ${companyName}`);
 
     return NextResponse.json({
       news: news.slice(0, 10), // Limit to 10 most recent
