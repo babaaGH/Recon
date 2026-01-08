@@ -14,6 +14,7 @@ import StockChart from '@/components/StockChart';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import IntelligenceLog from '@/components/IntelligenceLog';
 import Image from 'next/image';
+import { generateCompanyIntelligencePDF } from '@/lib/generatePDF';
 
 interface CompanyIntel {
   company_name: string;
@@ -352,6 +353,94 @@ export default function Home() {
     }, 100);
   };
 
+  // Download PDF handler
+  const handleDownloadPDF = async () => {
+    if (!searchResult) return;
+
+    try {
+      setMessage('Generating PDF report...');
+
+      // Fetch all data in parallel
+      const [
+        hiringResponse,
+        eventsResponse,
+        newsResponse,
+        secResponse
+      ] = await Promise.all([
+        fetch('/api/hiring-intelligence', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ companyName: searchResult.company_name }),
+        }),
+        fetch('/api/networking-events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ companyName: searchResult.company_name }),
+        }),
+        fetch('/api/strategic-news', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ companyName: searchResult.company_name }),
+        }),
+        fetch('/api/sec-filings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ companyName: searchResult.company_name }),
+        }),
+      ]);
+
+      const hiringData = await hiringResponse.json();
+      const eventsData = await eventsResponse.json();
+      const newsData = await newsResponse.json();
+      const secData = await secResponse.json();
+
+      // Calculate stock price change
+      let priceChange = '';
+      if (stockData.length > 0) {
+        const firstPrice = stockData[0]?.close || 0;
+        const lastPrice = stockData[stockData.length - 1]?.close || 0;
+        const change = lastPrice - firstPrice;
+        const percentChange = ((change / firstPrice) * 100).toFixed(2);
+        priceChange = `${change >= 0 ? '+' : ''}${percentChange}%`;
+      }
+
+      // Prepare data for PDF
+      const pdfData = {
+        companyName: searchResult.company_name,
+        industry: searchResult.industry,
+        orgType: searchResult.org_type,
+        hq: searchResult.hq,
+        revenue: searchResult.revenue,
+        stature: searchResult.stature,
+        operationalFocus: searchResult.operational_focus,
+        itSignal: searchResult.it_signal,
+        ticker: ticker,
+        stockPrice: stockData.length > 0 ? stockData[stockData.length - 1]?.close : undefined,
+        priceChange: priceChange,
+        targets: targets,
+        secFilings: secData.filings || [],
+        hiringData: {
+          engineering: hiringData.engineering || 0,
+          sales: hiringData.sales || 0,
+          marketing: hiringData.marketing || 0,
+          total: hiringData.total || 0,
+        },
+        events: eventsData.events || [],
+        news: newsData.news || [],
+      };
+
+      // Generate PDF
+      generateCompanyIntelligencePDF(pdfData);
+
+      setMessage('PDF downloaded successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setMessage('Error generating PDF. Please try again.');
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
   return (
     <div className="h-screen overflow-hidden flex flex-col">
       {/* Fixed Header */}
@@ -433,6 +522,31 @@ export default function Home() {
                 )}
               </div>
             </form>
+
+            {/* Download PDF Button - Shows when search result is available */}
+            {searchResult && (
+              <button
+                onClick={handleDownloadPDF}
+                className="flex-shrink-0 px-4 py-2.5 rounded-lg border border-[#007AFF] bg-[#007AFF] bg-opacity-10 text-[#007AFF] hover:bg-opacity-20 transition-all flex items-center gap-2 font-ui text-sm font-semibold"
+                title="Download Intelligence Report as PDF"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Download PDF</span>
+              </button>
+            )}
           </div>
 
           {/* Status Message */}
