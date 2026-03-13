@@ -11,7 +11,6 @@ import NetworkingEvents from '@/components/NetworkingEvents';
 import NextBestAction from '@/components/NextBestAction';
 import PainSignals from '@/components/PainSignals';
 import TriggerEvents from '@/components/TriggerEvents';
-import KeyContacts from '@/components/KeyContacts';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import IntelligenceLog from '@/components/IntelligenceLog';
 import Image from 'next/image';
@@ -559,11 +558,6 @@ export default function Home() {
                 {/* Next Best Action - Moved to top (highest value) */}
                 <ErrorBoundary>
                   <NextBestAction companyName={searchResult.company_name} />
-                </ErrorBoundary>
-
-                {/* Key Contacts - New Component */}
-                <ErrorBoundary>
-                  <KeyContacts />
                 </ErrorBoundary>
 
                 {/* Leadership Changes */}
