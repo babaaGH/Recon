@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-interface HiringSignal {
+interface TriggerEvent {
   title: string;
   link: string;
-  pubDate: string;
   source: string;
+  pubDate: string;
   daysAgo: string;
 }
 
@@ -69,10 +69,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company name required' }, { status: 400 });
     }
 
-    console.log(`Fetching hiring signals for: ${companyName}`);
+    console.log(`Fetching trigger events for: ${companyName}`);
 
-    // Google News RSS search query for hiring signals
-    const query = encodeURIComponent(`${companyName} hiring OR jobs OR workforce OR headcount OR recruiting`);
+    // Google News RSS search query for trigger events
+    const query = encodeURIComponent(`${companyName} funding OR acquisition OR merger OR IPO OR partnership OR launched OR appointed`);
     const url = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
 
     const response = await fetch(url, {
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       console.error(`Google News RSS error: ${response.status}`);
       return NextResponse.json({
-        signals: [],
+        events: [],
         total: 0
       });
     }
@@ -92,30 +92,30 @@ export async function POST(request: NextRequest) {
     const xml = await response.text();
     const items = await parseGoogleNewsRSS(xml);
 
-    const signals: HiringSignal[] = [];
+    const events: TriggerEvent[] = [];
 
-    // Process news items - take top 10 hiring signals
-    for (const item of items.slice(0, 10)) {
-      signals.push({
+    // Process news items - take top 5 trigger events
+    for (const item of items.slice(0, 5)) {
+      events.push({
         title: item.title,
         link: item.link,
-        pubDate: item.pubDate,
         source: item.source,
+        pubDate: item.pubDate,
         daysAgo: getDaysAgo(item.pubDate),
       });
     }
 
-    console.log(`✓ Found ${signals.length} hiring signals for ${companyName}`);
+    console.log(`✓ Found ${events.length} trigger events for ${companyName}`);
 
     return NextResponse.json({
-      signals,
-      total: signals.length
+      events,
+      total: events.length
     });
   } catch (error) {
-    console.error('Error in hiring-intelligence API:', error);
+    console.error('Error in trigger-events API:', error);
 
     return NextResponse.json({
-      signals: [],
+      events: [],
       total: 0
     });
   }

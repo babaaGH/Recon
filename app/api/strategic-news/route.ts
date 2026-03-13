@@ -5,101 +5,95 @@ interface NewsItem {
   date: string;
   category: string;
   impact: 'HIGH' | 'MEDIUM' | 'LOW';
+  source?: string;
+  url?: string;
 }
 
-interface NewsAPIArticle {
-  title: string;
-  description: string;
-  publishedAt: string;
-  source: {
-    name: string;
-  };
-  content?: string;
-}
+// Parse Google News RSS XML
+async function parseGoogleNewsRSS(xml: string): Promise<any[]> {
+  const items: any[] = [];
 
-interface NewsAPIResponse {
-  status: string;
-  totalResults: number;
-  articles: NewsAPIArticle[];
+  // Extract items using regex (simple XML parsing)
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let match;
+
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const itemContent = match[1];
+
+    // Extract title (with or without CDATA)
+    const titleCDataMatch = /<title><!\[CDATA\[(.*?)\]\]><\/title>/.exec(itemContent);
+    const titlePlainMatch = /<title>(.*?)<\/title>/.exec(itemContent);
+    const title = titleCDataMatch ? titleCDataMatch[1] : (titlePlainMatch ? titlePlainMatch[1] : '');
+
+    // Extract link
+    const linkMatch = /<link>(.*?)<\/link>/.exec(itemContent);
+    const link = linkMatch ? linkMatch[1] : '';
+
+    // Extract pubDate
+    const pubDateMatch = /<pubDate>(.*?)<\/pubDate>/.exec(itemContent);
+    const pubDate = pubDateMatch ? pubDateMatch[1] : '';
+
+    // Extract source
+    const sourceMatch = /<source.*?>(.*?)<\/source>/.exec(itemContent);
+    const source = sourceMatch ? sourceMatch[1] : '';
+
+    items.push({ title, link, pubDate, source });
+  }
+
+  return items;
 }
 
 // Helper function to categorize news and determine impact
-function categorizeNews(article: NewsAPIArticle): Pick<NewsItem, 'category' | 'impact'> {
-  const title = (article.title || '').toLowerCase();
-  const description = (article.description || '').toLowerCase();
-  const content = (article.content || '').toLowerCase();
-  const combined = `${title} ${description} ${content}`;
+function categorizeNews(title: string): Pick<NewsItem, 'category' | 'impact'> {
+  const titleLower = title.toLowerCase();
 
   let category = 'News';
   let impact: NewsItem['impact'] = 'MEDIUM';
 
-  // High impact keywords
-  const highImpactKeywords = [
-    'acquisition',
-    'merger',
-    'ipo',
-    'funding',
-    'expansion',
-    'partnership',
-    'layoff',
-    'ceo',
-    'bankruptcy',
-    'lawsuit',
-    'billion',
-    'strategic'
-  ];
-
-  // Category detection
-  if (combined.match(/acquisition|acquire|bought|purchase/)) {
+  // Category detection with impact
+  if (titleLower.match(/acquisition|acquire|bought|purchase|buys/)) {
     category = 'Acquisition';
     impact = 'HIGH';
-  } else if (combined.match(/merger|merge/)) {
+  } else if (titleLower.match(/merger|merge/)) {
     category = 'Merger';
     impact = 'HIGH';
-  } else if (combined.match(/expansion|expand|new market|international/)) {
+  } else if (titleLower.match(/expansion|expand|new market|international|global/)) {
     category = 'Expansion';
     impact = 'HIGH';
-  } else if (combined.match(/partnership|partner|collaborate|alliance/)) {
+  } else if (titleLower.match(/partnership|partner|collaborate|alliance|teams with/)) {
     category = 'Partnership';
     impact = 'HIGH';
-  } else if (combined.match(/funding|investment|raised|series [a-z]/)) {
+  } else if (titleLower.match(/funding|investment|raised|series [a-z]|capital/)) {
     category = 'Funding';
     impact = 'HIGH';
-  } else if (combined.match(/ipo|public offering|stock/)) {
-    category = 'IPO';
-    impact = 'HIGH';
-  } else if (combined.match(/product|launch|release|announce/)) {
+  } else if (titleLower.match(/product|launch|release|announce|unveils|introduces/)) {
     category = 'Product';
     impact = 'MEDIUM';
-  } else if (combined.match(/revenue|earnings|profit|financial/)) {
+  } else if (titleLower.match(/revenue|earnings|profit|financial|quarterly/)) {
     category = 'Financial';
     impact = 'MEDIUM';
-  } else if (combined.match(/client|customer|contract|deal/)) {
+  } else if (titleLower.match(/client|customer|contract|deal|wins/)) {
     category = 'Client Win';
     impact = 'MEDIUM';
-  } else if (combined.match(/layoff|restructure|downsize/)) {
+  } else if (titleLower.match(/layoff|restructure|downsize|cuts/)) {
     category = 'Restructuring';
     impact = 'HIGH';
-  } else if (combined.match(/ceo|executive|leadership|appoint/)) {
-    category = 'Leadership';
-    impact = 'MEDIUM';
-  } else if (combined.match(/lawsuit|legal|court|settle/)) {
+  } else if (titleLower.match(/lawsuit|legal|court|settle|sues/)) {
     category = 'Legal';
     impact = 'HIGH';
   }
 
-  // Override impact based on keywords
-  const hasHighImpact = highImpactKeywords.some(keyword => combined.includes(keyword));
-  if (hasHighImpact && impact === 'MEDIUM') {
-    impact = 'HIGH';
-  }
-
-  // Low impact for minor news
-  if (combined.match(/update|minor|small/)) {
-    impact = 'LOW';
-  }
-
   return { category, impact };
+}
+
+// Format date to YYYY-MM-DD
+function formatDate(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  } catch {
+    return new Date().toISOString().split('T')[0];
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -110,107 +104,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company name required' }, { status: 400 });
     }
 
-    const NEWS_API_KEY = process.env.NEWS_API_KEY;
-
-    if (!NEWS_API_KEY) {
-      console.log('NEWS_API_KEY not configured, returning mock data');
-      // Return mock data for testing
-      return NextResponse.json({
-        news: [
-          {
-            title: 'Company announces expansion into Asia-Pacific market',
-            date: '2025-01-02',
-            category: 'Expansion',
-            impact: 'HIGH' as const,
-          },
-          {
-            title: 'New partnership with Fortune 500 client',
-            date: '2024-12-28',
-            category: 'Client Win',
-            impact: 'HIGH' as const,
-          },
-          {
-            title: 'Product launch scheduled for Q1 2025',
-            date: '2024-12-15',
-            category: 'Product',
-            impact: 'MEDIUM' as const,
-          },
-        ],
-      });
-    }
-
     console.log(`Fetching strategic news for: ${companyName}`);
 
-    // NewsAPI.org endpoint for everything
-    // Get news from the last 30 days, sorted by most recent
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const fromDate = thirtyDaysAgo.toISOString().split('T')[0];
-
-    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(companyName)}&from=${fromDate}&sortBy=publishedAt&language=en&apiKey=${NEWS_API_KEY}`;
+    // Google News RSS search query
+    const query = encodeURIComponent(`${companyName} partnership OR acquisition OR product launch OR expansion`);
+    const url = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
 
     const response = await fetch(url, {
-      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
     });
 
     if (!response.ok) {
-      console.error(`NewsAPI error: ${response.status} ${response.statusText}`);
-      // Return mock data as fallback
+      console.error(`Google News RSS error: ${response.status}`);
       return NextResponse.json({
-        news: [
-          {
-            title: 'Strategic initiative underway',
-            date: new Date().toISOString().split('T')[0],
-            category: 'Strategy',
-            impact: 'MEDIUM' as const,
-          },
-        ],
+        news: [],
       });
     }
 
-    const data: NewsAPIResponse = await response.json();
+    const xml = await response.text();
+    const items = await parseGoogleNewsRSS(xml);
 
-    // Transform NewsAPI response to our format
-    const news: NewsItem[] = [];
+    // Transform to NewsItem format
+    const news: NewsItem[] = items.slice(0, 10).map((item) => {
+      const { category, impact } = categorizeNews(item.title);
 
-    if (data.articles && Array.isArray(data.articles)) {
-      data.articles.forEach((article: NewsAPIArticle) => {
-        const { category, impact } = categorizeNews(article);
+      return {
+        title: item.title,
+        date: formatDate(item.pubDate),
+        category,
+        impact,
+        source: item.source,
+        url: item.link,
+      };
+    });
 
-        // Format date
-        const articleDate = new Date(article.publishedAt);
-        const formattedDate = articleDate.toISOString().split('T')[0];
-
-        news.push({
-          title: article.title,
-          date: formattedDate,
-          category,
-          impact,
-        });
-      });
-    }
-
-    console.log(`✓ Found ${news.length} news articles from NewsAPI for ${companyName}`);
+    console.log(`✓ Found ${news.length} strategic news articles for ${companyName}`);
 
     return NextResponse.json({
-      news: news.slice(0, 10), // Limit to 10 most recent
+      news,
     });
   } catch (error) {
     console.error('Error fetching strategic news:', error);
 
-    // Return mock data on error
     return NextResponse.json({
-      news: [
-        {
-          title: 'Recent strategic development',
-          date: new Date().toISOString().split('T')[0],
-          category: 'Update',
-          impact: 'MEDIUM' as const,
-        },
-      ],
+      news: [],
     });
   }
 }

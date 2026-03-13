@@ -96,35 +96,38 @@ export default function NetworkingEvents({ companyName }: NetworkingEventsProps)
       {/* Collapsed Summary - Clickable */}
       <div
         onClick={() => setIsModalOpen(true)}
-        className="border border-[var(--border-primary)] rounded-lg p-4 bg-black bg-opacity-40 hover:border-[#007AFF] transition-all cursor-pointer"
+        className="border border-[#222222] rounded-lg p-6 bg-[#111111] hover:bg-[#1A1A1A] transition-all cursor-pointer"
       >
         <div className="flex items-center justify-between gap-4">
           {/* Left: Count & Label */}
           <div>
-            <div className="label-caps opacity-60 mb-1">Networking & Events</div>
-            <div className="font-mono-data text-3xl text-white" style={{ letterSpacing: '0.02em' }}>
+            <div className="text-sm font-semibold uppercase tracking-wider text-[#888888] mb-1">Networking & Events</div>
+            <div className="text-6xl font-bold text-[#E5E5E5]">
               {events.length}
             </div>
-            <div className="mt-2 text-xs text-gray-400">
+            <div className="mt-2 text-xs text-[#888888]">
               Upcoming Events
+            </div>
+            <div className="text-xs text-[#888888] mt-1">
+              Updated 15 mins ago
             </div>
           </div>
 
           {/* Middle: Breakdown by Type */}
           <div className="flex-1">
-            <div className="label-caps opacity-60 mb-2">By Type</div>
+            <div className="text-sm font-semibold uppercase tracking-wider text-[#888888] mb-2">By Type</div>
             <div className="space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--text-secondary)]">Conferences</span>
-                <span className="font-mono font-semibold text-white">{conferenceCount}</span>
+                <span className="text-[#888888]">Conferences</span>
+                <span className="text-sm font-semibold text-[#E5E5E5]">{conferenceCount}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--text-secondary)]">Sponsorships</span>
-                <span className="font-mono font-semibold text-white">{sponsorshipCount}</span>
+                <span className="text-[#888888]">Sponsorships</span>
+                <span className="text-sm font-semibold text-[#E5E5E5]">{sponsorshipCount}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--text-secondary)]">Speaking</span>
-                <span className="font-mono font-semibold text-white">{speakingCount}</span>
+                <span className="text-[#888888]">Speaking</span>
+                <span className="text-sm font-semibold text-[#E5E5E5]">{speakingCount}</span>
               </div>
             </div>
           </div>
@@ -149,10 +152,10 @@ export default function NetworkingEvents({ companyName }: NetworkingEventsProps)
             {/* Modal Header */}
             <div className="border-b border-[#333333] p-6 flex items-center justify-between">
               <div>
-                <h3 className="font-ui text-xl font-semibold text-[#E0E0E0]">
+                <h3 className="text-2xl font-bold text-[#E0E0E0]">
                   Networking & Events
                 </h3>
-                <p className="font-ui text-sm text-[var(--text-secondary)] mt-1">
+                <p className="text-sm text-[var(--text-secondary)] mt-1">
                   {companyName} • {events.length} Upcoming Events
                 </p>
               </div>
@@ -173,7 +176,7 @@ export default function NetworkingEvents({ companyName }: NetworkingEventsProps)
                     <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">
                       Conferences
                     </div>
-                    <div className="text-3xl font-mono font-bold text-white">
+                    <div className="text-6xl font-bold text-white">
                       {conferenceCount}
                     </div>
                   </div>
@@ -181,7 +184,7 @@ export default function NetworkingEvents({ companyName }: NetworkingEventsProps)
                     <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">
                       Sponsorships
                     </div>
-                    <div className="text-3xl font-mono font-bold text-white">
+                    <div className="text-6xl font-bold text-white">
                       {sponsorshipCount}
                     </div>
                   </div>
@@ -189,7 +192,7 @@ export default function NetworkingEvents({ companyName }: NetworkingEventsProps)
                     <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">
                       Speaking
                     </div>
-                    <div className="text-3xl font-mono font-bold text-white">
+                    <div className="text-6xl font-bold text-white">
                       {speakingCount}
                     </div>
                   </div>
@@ -197,7 +200,7 @@ export default function NetworkingEvents({ companyName }: NetworkingEventsProps)
                     <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">
                       Total
                     </div>
-                    <div className="text-3xl font-mono font-bold text-white">
+                    <div className="text-6xl font-bold text-white">
                       {events.length}
                     </div>
                   </div>
@@ -221,7 +224,7 @@ export default function NetworkingEvents({ companyName }: NetworkingEventsProps)
                           {/* Left: Event Info */}
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-3">
-                              <h5 className="text-lg font-bold text-white">{event.name}</h5>
+                              <h5 className="text-sm font-bold text-white">{event.name}</h5>
                               {getTypeBadge(event.type)}
                               <span
                                 className="px-2 py-0.5 rounded text-xs font-bold"

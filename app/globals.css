@@ -1,85 +1,120 @@
 @import "tailwindcss";
 
-/* ========== 2026 FINTECH HARDENING ========== */
-/* Mixed Pairing System: Inter (UI) + JetBrains Mono (Data) */
-/* OLED Black optimized for extended usage and professional clarity */
+/* ========== APPLE DESIGN SYSTEM (2026) ========== */
+/* Single Font System: Inter for all typography */
+/* OLED Black optimized with Apple HIG color palette */
 
 :root {
-  /* ========== 2026 FINTECH PALETTE ========== */
-  /* OLED Black Background - True #000000 for premium displays */
-  --bg-primary: #000000;        /* Pure OLED black - main background */
-  --bg-surface: rgba(26, 26, 26, 0.6);  /* Semi-transparent surface for glass effect */
-  --bg-elevated: #1a1a1a;       /* Elevated cards and surfaces */
-  --bg-secondary: rgba(0, 0, 0, 0.4);   /* Secondary backgrounds */
+  /* ========== APPLE COLOR SYSTEM ========== */
+  /* Backgrounds */
+  --bg-primary: #000000;        /* Pure OLED black */
+  --bg-card: #111111;          /* Card backgrounds */
+  --bg-card-hover: #1A1A1A;    /* Card hover state */
+  --bg-surface: rgba(26, 26, 26, 0.6);  /* Glass effect (legacy) */
+  --bg-elevated: #1a1a1a;       /* Elevated surfaces (legacy) */
+  --bg-secondary: rgba(0, 0, 0, 0.4);   /* Secondary backgrounds (legacy) */
 
-  /* Typography: Anti-halation colors for OLED */
-  --text-primary: #E0E0E0;      /* Off-White - prevents halation on OLED */
-  --text-secondary: #888888;    /* Gray - labels and meta information */
-  --text-muted: #64748b;        /* Muted - tertiary information */
+  /* Text Colors */
+  --text-primary: #E5E5E5;     /* Primary text */
+  --text-secondary: #888888;   /* Secondary text (labels, meta) */
+  --text-on-color: #FFFFFF;    /* Text on colored backgrounds */
+  --text-muted: #64748b;       /* Muted text (legacy) */
 
-  /* Borders: Glassmorphic with interaction states */
-  --border-glass: rgba(51, 51, 51, 0.5);     /* Subtle glass borders */
-  --border-glass-hover: rgba(0, 122, 255, 0.5);  /* Apple Blue on hover */
-  --border-primary: #333333;    /* Solid border for separation */
+  /* Borders */
+  --border-primary: #222222;   /* All card borders */
+  --border-glass: rgba(51, 51, 51, 0.5);     /* Glass borders (legacy) */
+  --border-glass-hover: rgba(0, 122, 255, 0.5);  /* Hover state (legacy) */
   --border-slate: rgba(51, 51, 51, 0.5);    /* Legacy compatibility */
 
-  /* ========== FINTECH ACCENT SYSTEM ========== */
-  --accent-apple-blue: #007AFF; /* Apple Blue - primary interactions */
-  --accent-cyan: #10b981;       /* Green - positive growth, success */
-  --accent-amber: #fb923c;      /* Amber - warnings, caution */
-  --accent-indigo: #6366f1;     /* Indigo - AI-generated content */
-  --accent-primary: #4a9eff;    /* Legacy blue - links, CTAs */
+  /* ========== APPLE ACCENT COLORS ========== */
+  --accent-blue: #007AFF;      /* Apple Blue - primary accent */
+  --color-positive: #30D158;   /* Apple Green - positive/success */
+  --color-warning: #FF9F0A;    /* Apple Orange - warning */
+  --color-negative: #FF453A;   /* Apple Red - negative/error */
+
+  /* Legacy accent compatibility */
+  --accent-apple-blue: #007AFF;
+  --accent-cyan: #30D158;      /* Updated to Apple Green */
+  --accent-amber: #FF9F0A;     /* Updated to Apple Orange */
+  --accent-indigo: #6366f1;    /* Kept for AI content */
+  --accent-primary: #007AFF;   /* Updated to Apple Blue */
 
   /* ========== STATE INDICATORS ========== */
-  --status-healthy: #10b981;    /* Green */
-  --status-warning: #fb923c;    /* Amber */
-  --status-critical: #ef4444;   /* Red */
-  --status-ai: #6366f1;         /* Indigo */
+  --status-healthy: #30D158;   /* Apple Green */
+  --status-warning: #FF9F0A;   /* Apple Orange */
+  --status-critical: #FF453A;  /* Apple Red */
+  --status-ai: #6366f1;        /* Indigo for AI */
 
   /* State backgrounds with subtle glow */
-  --glow-cyan: rgba(16, 185, 129, 0.15);
-  --glow-amber: rgba(251, 146, 60, 0.15);
+  --glow-cyan: rgba(48, 209, 88, 0.15);    /* Apple Green glow */
+  --glow-amber: rgba(255, 159, 10, 0.15);  /* Apple Orange glow */
   --glow-indigo: rgba(99, 102, 241, 0.15);
-  --glow-red: rgba(239, 68, 68, 0.15);
+  --glow-red: rgba(255, 69, 58, 0.15);     /* Apple Red glow */
 
   /* ========== LEGACY COMPATIBILITY ========== */
   --dark-slate: #1a1a1a;
-  --state-positive: var(--accent-cyan);
-  --state-warning: var(--accent-amber);
-  --state-critical: #ef4444;
+  --state-positive: var(--color-positive);
+  --state-warning: var(--color-warning);
+  --state-critical: var(--color-negative);
   --state-info: var(--accent-indigo);
   --success-bg: var(--glow-cyan);
   --warning-bg: var(--glow-amber);
   --error-bg: var(--glow-red);
   --info-bg: var(--glow-indigo);
-  --link-default: var(--accent-apple-blue);
+  --link-default: var(--accent-blue);
   --link-visited: var(--accent-indigo);
 
-  /* ========== TYPOGRAPHY SYSTEM ========== */
-  /* Mixed Pairing: Inter for UI, JetBrains Mono for Data */
+  /* ========== APPLE TYPOGRAPHY SYSTEM ========== */
+  /* Single Font Family: Inter for everything (Apple HIG approach) */
   --font-ui: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-data: var(--font-jetbrains-mono), 'IBM Plex Mono', 'Courier New', monospace;
+  --font-data: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  --font-header: 600;           /* Semi-bold for section headers */
-  --font-body: 400;             /* Regular for body text */
-  --font-label: 500;            /* Medium for labels/tags */
+  /* Apple Typography Scale */
+  --text-h1: 24px;              /* H1 - Main headers */
+  --text-h2: 18px;              /* H2 - Section headers */
+  --text-h3: 14px;              /* H3 - Card titles */
+  --text-body: 14px;            /* Body text */
+  --text-label: 12px;           /* Labels and meta */
+  --text-data: 28px;            /* Large data numbers */
+  --text-section-header: 16px;  /* Section headers */
+  --text-headline: 13px;        /* News headlines */
 
-  /* Base Typography Scale (1rem = 16px) */
+  /* Font Weights - Apple Standard */
+  --weight-regular: 400;        /* Body text */
+  --weight-medium: 500;         /* H3, subtle emphasis */
+  --weight-semibold: 600;       /* H1, H2 */
+  --weight-bold: 700;           /* Data numbers */
+
+  /* Legacy font weights */
+  --font-header: 600;
+  --font-body: 400;
+  --font-label: 500;
+
+  /* Legacy typography scale (for compatibility) */
   --text-base: 1rem;            /* 16px - body text */
   --text-sm: 0.875rem;          /* 14px - small labels */
   --text-xs: 0.75rem;           /* 12px - meta information */
   --text-lg: 1.125rem;          /* 18px - financial data highlights */
   --text-xl: 1.25rem;           /* 20px - section headers */
 
-  /* Line Heights for readability */
-  --leading-base: 1.6;          /* Body text */
-  --leading-tight: 1.4;         /* Headers */
-  --leading-relaxed: 1.75;      /* Long-form content */
+  /* Line Heights */
+  --leading-tight: 1.2;         /* Headers */
+  --leading-normal: 1.5;        /* Body, labels */
+  --leading-relaxed: 1.6;       /* Paragraphs */
+  --leading-base: 1.6;          /* Legacy */
 
-  /* Letter Spacing for Data Clarity */
-  --tracking-data: 0.02em;      /* Monospace data - improves 0/8 distinction */
-  --tracking-normal: 0;         /* UI text */
+  /* Letter Spacing */
+  --tracking-normal: 0;         /* Default text */
   --tracking-wide: 0.05em;      /* All-caps labels */
+  --tracking-data: 0.02em;      /* Data - improves readability */
+
+  /* ========== APPLE SPACING SYSTEM (8px base) ========== */
+  --space-1: 8px;    /* 1 unit */
+  --space-2: 16px;   /* 2 units */
+  --space-3: 24px;   /* 3 units */
+  --space-4: 32px;   /* 4 units */
+  --space-5: 40px;   /* 5 units */
+  --space-6: 48px;   /* 6 units */
 }
 
 @theme inline {
@@ -360,6 +395,110 @@ a:hover {
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--text-secondary);
+}
+
+/* ========== APPLE TYPOGRAPHY CLASSES ========== */
+.text-h1 {
+  font-family: var(--font-ui);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.text-h2 {
+  font-family: var(--font-ui);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.text-h3 {
+  font-family: var(--font-ui);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-normal);
+}
+
+.text-body {
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+}
+
+.text-label {
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+}
+
+.text-data-large {
+  font-family: var(--font-ui);
+  font-size: 28px;
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-data);
+}
+
+.text-section-header {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.text-headline {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+}
+
+/* ========== APPLE CARD SYSTEM ========== */
+.apple-card {
+  background: #111111;
+  border: 1px solid #222222;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+@media (hover: hover) {
+  .apple-card:hover {
+    background: #1A1A1A;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.apple-card-clickable {
+  background: #111111;
+  border: 1px solid #222222;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .apple-card-clickable:hover {
+    background: #1A1A1A;
+    border-color: #007AFF;
+  }
+}
+
+/* ========== SKELETON LOADER ANIMATION ========== */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* ========== CUSTOM SCROLLBARS ========== */

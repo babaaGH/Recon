@@ -128,17 +128,17 @@ export default function NewsSentiment({ companyName, articles }: NewsSentimentPr
       {/* Collapsed Summary */}
       <div
         onClick={() => setIsModalOpen(true)}
-        className="border border-[var(--border-primary)] rounded-lg p-4 bg-black bg-opacity-40 hover:border-[#007AFF] transition-all cursor-pointer"
+        className="border border-[#222222] rounded-lg p-6 bg-[#111111] hover:bg-[#1A1A1A] transition-all cursor-pointer"
       >
         <div className="space-y-4">
           {/* Sentiment Meter */}
           <div>
-            <div className="label-caps opacity-60 mb-2">Overall Sentiment</div>
+            <div className="text-label uppercase tracking-wider text-[#888888] mb-2">Overall Sentiment</div>
 
             {/* Horizontal Bar with Needle */}
             <div className="relative">
               {/* Background Bar */}
-              <div className="h-2 rounded-full bg-gradient-to-r from-[#ef4444] via-[#888888] to-[#10b981] opacity-30"></div>
+              <div className="h-2 rounded-full bg-gradient-to-r from-[#FF453A] via-[#888888] to-[#30D158] opacity-30"></div>
 
               {/* Needle */}
               <div
@@ -154,7 +154,7 @@ export default function NewsSentiment({ companyName, articles }: NewsSentimentPr
             {/* Sentiment Label */}
             <div className="mt-3 flex items-center gap-3">
               <span
-                className="inline-block px-3 py-1 rounded text-xs font-ui font-bold"
+                className="inline-block px-3 py-1 rounded text-label font-bold"
                 style={{
                   backgroundColor: `${sentimentColor}20`,
                   color: sentimentColor,
@@ -162,17 +162,25 @@ export default function NewsSentiment({ companyName, articles }: NewsSentimentPr
               >
                 {sentimentLabel}
               </span>
-              <div className="font-mono-data text-sm text-[var(--text-secondary)]" style={{ letterSpacing: '0.02em' }}>
+              <div className="text-body text-[#888888] flex items-center gap-2">
                 Score: {sentimentScore.toFixed(0)}
+                <span className={`${sentimentScore > 30 ? 'text-[#30D158]' : 'text-[#FF453A]'}`}>
+                  {sentimentScore > 30 ? '↑' : '↓'}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* 24h Article Count */}
-          <div className="flex items-center justify-between pt-2 border-t border-[#333333]">
-            <div className="label-caps opacity-60">24h Articles</div>
-            <div className="font-mono-data text-xl text-[#007AFF]">
-              {recentArticles.length}
+          {/* 24h Article Count & Timestamp */}
+          <div className="flex items-center justify-between pt-2 border-t border-[#222222]">
+            <div>
+              <div className="text-label uppercase tracking-wider text-[#888888]">24h Articles</div>
+              <div className="text-h2 text-[#007AFF] mt-1">
+                {recentArticles.length}
+              </div>
+              <div className="text-label text-[#888888] mt-1">
+                Updated 12 mins ago
+              </div>
             </div>
           </div>
         </div>

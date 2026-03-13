@@ -9,11 +9,6 @@ interface JobData {
   count: number;
 }
 
-interface TechStack {
-  name: string;
-  category: string;
-}
-
 interface CompanyIntelligenceProps {
   companyName: string;
   industry: string;
@@ -23,7 +18,6 @@ interface CompanyIntelligenceProps {
 
 export default function CompanyIntelligence({ companyName, industry, revenue, logoUrl }: CompanyIntelligenceProps) {
   const [jobData, setJobData] = useState<JobData[]>([]);
-  const [techStack, setTechStack] = useState<TechStack[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,22 +43,6 @@ export default function CompanyIntelligence({ companyName, industry, revenue, lo
         }
       } catch (err) {
         console.error('Error fetching hiring data:', err);
-      }
-
-      // Fetch tech stack
-      try {
-        const techRes = await fetch('/api/tech-stack', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ companyName }),
-        });
-
-        if (techRes.ok) {
-          const data = await techRes.json();
-          setTechStack(data.technologies || []);
-        }
-      } catch (err) {
-        console.error('Error fetching tech stack:', err);
       }
 
       setLoading(false);
@@ -167,26 +145,6 @@ export default function CompanyIntelligence({ companyName, industry, revenue, lo
             </>
           ) : (
             <div className="text-center py-6 text-gray-500 text-sm">No active hiring</div>
-          )}
-        </div>
-
-        {/* Tech Stack */}
-        <div className="bg-black border border-[#333] rounded-lg p-6">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Tech Stack</h3>
-
-          {techStack.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {techStack.slice(0, 12).map((tech, index) => (
-                <div
-                  key={index}
-                  className="px-3 py-1.5 rounded-full text-xs font-medium bg-[#007AFF] bg-opacity-10 text-[#007AFF] border border-[#007AFF] border-opacity-20"
-                >
-                  {tech.name}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-6 text-gray-500 text-sm">No tech data available</div>
           )}
         </div>
 

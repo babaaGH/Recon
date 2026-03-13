@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-interface HiringSignal {
+interface PainSignal {
   title: string;
   link: string;
-  pubDate: string;
   source: string;
   daysAgo: string;
 }
@@ -69,10 +68,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company name required' }, { status: 400 });
     }
 
-    console.log(`Fetching hiring signals for: ${companyName}`);
+    console.log(`Fetching pain signals for: ${companyName}`);
 
-    // Google News RSS search query for hiring signals
-    const query = encodeURIComponent(`${companyName} hiring OR jobs OR workforce OR headcount OR recruiting`);
+    // Google News RSS search query for pain signals
+    const query = encodeURIComponent(`${companyName} lawsuit OR layoffs OR outage OR breach OR regulatory OR fine OR missed earnings`);
     const url = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
 
     const response = await fetch(url, {
@@ -92,27 +91,26 @@ export async function POST(request: NextRequest) {
     const xml = await response.text();
     const items = await parseGoogleNewsRSS(xml);
 
-    const signals: HiringSignal[] = [];
+    const signals: PainSignal[] = [];
 
-    // Process news items - take top 10 hiring signals
-    for (const item of items.slice(0, 10)) {
+    // Process news items - take top 3 pain signals
+    for (const item of items.slice(0, 3)) {
       signals.push({
         title: item.title,
         link: item.link,
-        pubDate: item.pubDate,
         source: item.source,
         daysAgo: getDaysAgo(item.pubDate),
       });
     }
 
-    console.log(`✓ Found ${signals.length} hiring signals for ${companyName}`);
+    console.log(`✓ Found ${signals.length} pain signals for ${companyName}`);
 
     return NextResponse.json({
       signals,
       total: signals.length
     });
   } catch (error) {
-    console.error('Error in hiring-intelligence API:', error);
+    console.error('Error in pain-signals API:', error);
 
     return NextResponse.json({
       signals: [],

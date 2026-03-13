@@ -367,25 +367,52 @@ function extractTechInitiatives(snippets: string[]): string[] {
  * Search for company IT news and digital transformation initiatives
  */
 export async function searchCompanyITNews(companyName: string): Promise<string> {
-  const query = `${companyName} digital transformation cloud AI technology 2024`;
-  const results = await searchWeb(query);
+  try {
+    // Use Google News RSS to find IT/technology news about the company
+    const query = encodeURIComponent(`${companyName} digital transformation OR cloud OR AI OR technology`);
+    const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
 
-  if (!results || !results.organic || results.organic.length === 0) {
+    const response = await fetch(rssUrl);
+    if (!response.ok) {
+      return `${companyName} is active in the financial services sector. Manual research recommended for specific IT initiatives.`;
+    }
+
+    const xmlText = await response.text();
+
+    // Extract news items from RSS feed
+    const items = xmlText.match(/<item>[\s\S]*?<\/item>/g) || [];
+
+    if (items.length === 0) {
+      return `No recent IT/technology news found for ${companyName}. Manual research recommended for specific IT initiatives.`;
+    }
+
+    // Extract titles from first 5 items
+    const initiatives: string[] = [];
+    for (const item of items.slice(0, 5)) {
+      // Try CDATA format first, then plain text
+      const titleCDataMatch = /<title><!\[CDATA\[(.*?)\]\]><\/title>/.exec(item);
+      const titlePlainMatch = /<title>(.*?)<\/title>/.exec(item);
+      const title = titleCDataMatch ? titleCDataMatch[1] : (titlePlainMatch ? titlePlainMatch[1] : '');
+
+      if (title) {
+        // Extract the actual headline (remove source suffix like " - Reuters")
+        const headline = title.split(' - ')[0].trim();
+        if (headline) {
+          initiatives.push(headline);
+        }
+      }
+    }
+
+    if (initiatives.length === 0) {
+      return `${companyName} is active in the financial services sector. Manual research recommended for specific IT initiatives.`;
+    }
+
+    // Format as bullet points
+    return initiatives.map(init => `• ${init}`).join('\n');
+  } catch (error) {
+    console.error('Error fetching IT news from Google News RSS:', error);
     return `${companyName} is active in the financial services sector. Manual research recommended for specific IT initiatives.`;
   }
-
-  // Extract clean initiatives from snippets
-  const snippets = results.organic.slice(0, 5).map(r => r.snippet);
-  const initiatives = extractTechInitiatives(snippets);
-
-  if (initiatives.length === 0) {
-    // Fallback to first snippet if no initiatives found
-    const firstSnippet = cleanText(results.organic[0].snippet);
-    return firstSnippet.slice(0, 250);
-  }
-
-  // Format as bullet points
-  return initiatives.map(init => `• ${init}`).join('\n');
 }
 
 /**

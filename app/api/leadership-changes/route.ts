@@ -8,174 +8,110 @@ interface LeadershipHire {
   joinedDate: string;
   previousCompany?: string;
   linkedinUrl?: string;
+  source?: string;
+  articleUrl?: string;
 }
 
-// Generate realistic mock leadership hire data
-function generateMockLeadershipData(companyName: string): LeadershipHire[] {
-  const seed = companyName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+// Parse Google News RSS XML
+async function parseGoogleNewsRSS(xml: string): Promise<any[]> {
+  const items: any[] = [];
 
-  const executiveNames = [
-    'Sarah Chen', 'Michael Rodriguez', 'Jennifer Kim', 'David Thompson', 'Amanda Foster',
-    'Robert Martinez', 'Emily Watson', 'James Patterson', 'Lisa Anderson', 'Christopher Lee',
-    'Maria Garcia', 'Daniel Brown', 'Rachel Green', 'Kevin O\'Brien', 'Nicole Davis'
-  ];
+  // Extract items using regex (simple XML parsing)
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let match;
 
-  const cSuiteTitles = [
-    'Chief Technology Officer',
-    'Chief Financial Officer',
-    'Chief Operating Officer',
-    'Chief Marketing Officer',
-    'Chief Product Officer',
-    'Chief Revenue Officer'
-  ];
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const itemContent = match[1];
 
-  const svpTitles = [
-    'SVP of Engineering',
-    'SVP of Sales',
-    'SVP of Product',
-    'SVP of Operations',
-    'SVP of Marketing',
-    'SVP of Customer Success'
-  ];
+    // Extract title (with or without CDATA)
+    const titleCDataMatch = /<title><!\[CDATA\[(.*?)\]\]><\/title>/.exec(itemContent);
+    const titlePlainMatch = /<title>(.*?)<\/title>/.exec(itemContent);
+    const title = titleCDataMatch ? titleCDataMatch[1] : (titlePlainMatch ? titlePlainMatch[1] : '');
 
-  const vpTitles = [
-    'VP of Engineering',
-    'VP of Sales',
-    'VP of Product Management',
-    'VP of Business Development',
-    'VP of Finance',
-    'VP of Marketing',
-    'VP of Operations',
-    'VP of Data Science'
-  ];
+    // Extract link
+    const linkMatch = /<link>(.*?)<\/link>/.exec(itemContent);
+    const link = linkMatch ? linkMatch[1] : '';
 
-  const headTitles = [
-    'Head of Engineering',
-    'Head of Product',
-    'Head of Growth',
-    'Head of Design',
-    'Head of Analytics',
-    'Head of Customer Success'
-  ];
+    // Extract pubDate
+    const pubDateMatch = /<pubDate>(.*?)<\/pubDate>/.exec(itemContent);
+    const pubDate = pubDateMatch ? pubDateMatch[1] : '';
 
-  const departments = [
-    'Engineering',
-    'Sales',
-    'Marketing',
-    'Operations',
-    'Product',
-    'Finance',
-    'Customer Success'
-  ];
+    // Extract source
+    const sourceMatch = /<source.*?>(.*?)<\/source>/.exec(itemContent);
+    const source = sourceMatch ? sourceMatch[1] : '';
 
-  const previousCompanies = [
-    'Google',
-    'Meta',
-    'Amazon',
-    'Microsoft',
-    'Apple',
-    'Salesforce',
-    'Adobe',
-    'Oracle',
-    'IBM',
-    'Netflix',
-    'Stripe',
-    'Airbnb',
-    'Uber',
-    'LinkedIn',
-    'Twitter'
-  ];
-
-  const hires: LeadershipHire[] = [];
-
-  // Generate 2-3 C-Suite hires
-  const cSuiteCount = 2 + (seed % 2);
-  for (let i = 0; i < cSuiteCount; i++) {
-    const nameIndex = (seed + i * 7) % executiveNames.length;
-    const titleIndex = (seed + i * 5) % cSuiteTitles.length;
-    const deptIndex = (seed + i * 3) % departments.length;
-    const prevCompIndex = (seed + i * 11) % previousCompanies.length;
-    const daysAgo = 30 + ((seed + i * 13) % 120);
-
-    hires.push({
-      name: executiveNames[nameIndex],
-      title: cSuiteTitles[titleIndex],
-      level: 'C-Suite',
-      department: departments[deptIndex],
-      joinedDate: `${daysAgo} days ago`,
-      previousCompany: previousCompanies[prevCompIndex],
-      linkedinUrl: `https://linkedin.com/in/${executiveNames[nameIndex].toLowerCase().replace(' ', '-')}`
-    });
+    items.push({ title, link, pubDate, source });
   }
 
-  // Generate 2-4 SVP hires
-  const svpCount = 2 + (seed % 3);
-  for (let i = 0; i < svpCount; i++) {
-    const nameIndex = (seed + i * 9 + 100) % executiveNames.length;
-    const titleIndex = (seed + i * 7) % svpTitles.length;
-    const deptIndex = (seed + i * 5) % departments.length;
-    const prevCompIndex = (seed + i * 17) % previousCompanies.length;
-    const daysAgo = 20 + ((seed + i * 19) % 100);
+  return items;
+}
 
-    hires.push({
-      name: executiveNames[nameIndex],
-      title: svpTitles[titleIndex],
-      level: 'SVP',
-      department: departments[deptIndex],
-      joinedDate: `${daysAgo} days ago`,
-      previousCompany: previousCompanies[prevCompIndex],
-      linkedinUrl: `https://linkedin.com/in/${executiveNames[nameIndex].toLowerCase().replace(' ', '-')}`
-    });
+// Extract executive info from news title
+function extractExecutiveInfo(title: string): { name: string; role: string; level: 'C-Suite' | 'SVP' | 'VP' | 'Head' } | null {
+  const titleLower = title.toLowerCase();
+
+  // Patterns for executive changes - expanded for better matching
+  const patterns = [
+    // "Company appoints/names/hires John Doe as CEO/CIO/CFO"
+    /(?:appoints?|names?|hires?|welcomes?)\s+([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+as\s+(?:new\s+)?([A-Z]{3}|CEO|CFO|CTO|COO|CIO|CMO|Chief\s+\w+\s+Officer)/i,
+    // "John Doe named/appointed CEO of Company"
+    /([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:named|appointed|promoted)\s+(?:as\s+)?(?:new\s+)?([A-Z]{3}|CEO|CFO|CTO|COO|CIO|CMO|Chief\s+\w+\s+Officer)/i,
+    // "John Doe joins Company as CIO/VP" (critical for Fiserv Ninish Ulkan case)
+    /([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+joins\s+[A-Za-z\s]+\s+as\s+(?:new\s+)?([A-Z]{3}|CEO|CFO|CTO|COO|CIO|CMO|VP|SVP|EVP|President|Chief\s+\w+\s+Officer|Vice\s+President)/i,
+    // "Company welcomes John Doe as new CIO"
+    /welcomes?\s+([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+as\s+(?:new\s+)?([A-Z]{3}|CEO|CFO|CTO|COO|CIO|CMO|VP|President)/i,
+    // "New CEO John Doe"
+    /(?:new|incoming)\s+([A-Z]{3}|CEO|CFO|CTO|COO|CIO|CMO)\s+([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = title.match(pattern);
+    if (match) {
+      let name = '';
+      let role = '';
+
+      // Handle different match group orders
+      if (pattern.toString().includes('new|incoming')) {
+        // Pattern: "New CEO John Doe"
+        role = match[1].trim();
+        name = match[2].trim();
+      } else {
+        // Pattern: "John Doe as CEO" or "appoints John Doe as CEO"
+        name = match[1].trim();
+        role = match[2].trim();
+      }
+
+      // Determine level
+      let level: 'C-Suite' | 'SVP' | 'VP' | 'Head' = 'VP';
+      if (/CEO|CFO|CTO|COO|CIO|CMO|Chief/i.test(role)) {
+        level = 'C-Suite';
+      } else if (/SVP|Senior Vice President/i.test(role)) {
+        level = 'SVP';
+      } else if (/Head of/i.test(role)) {
+        level = 'Head';
+      }
+
+      return { name, role, level };
+    }
   }
 
-  // Generate 3-5 VP hires
-  const vpCount = 3 + (seed % 3);
-  for (let i = 0; i < vpCount; i++) {
-    const nameIndex = (seed + i * 11 + 200) % executiveNames.length;
-    const titleIndex = (seed + i * 9) % vpTitles.length;
-    const deptIndex = (seed + i * 7) % departments.length;
-    const prevCompIndex = (seed + i * 23) % previousCompanies.length;
-    const daysAgo = 10 + ((seed + i * 29) % 90);
+  return null;
+}
 
-    hires.push({
-      name: executiveNames[nameIndex],
-      title: vpTitles[titleIndex],
-      level: 'VP',
-      department: departments[deptIndex],
-      joinedDate: `${daysAgo} days ago`,
-      previousCompany: previousCompanies[prevCompIndex],
-      linkedinUrl: `https://linkedin.com/in/${executiveNames[nameIndex].toLowerCase().replace(' ', '-')}`
-    });
+// Calculate days ago from date string
+function getDaysAgo(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return '1 day ago';
+    return `${diffDays} days ago`;
+  } catch {
+    return 'Recently';
   }
-
-  // Generate 1-3 Head-level hires
-  const headCount = 1 + (seed % 3);
-  for (let i = 0; i < headCount; i++) {
-    const nameIndex = (seed + i * 13 + 300) % executiveNames.length;
-    const titleIndex = (seed + i * 11) % headTitles.length;
-    const deptIndex = (seed + i * 9) % departments.length;
-    const prevCompIndex = (seed + i * 31) % previousCompanies.length;
-    const daysAgo = 5 + ((seed + i * 37) % 80);
-
-    hires.push({
-      name: executiveNames[nameIndex],
-      title: headTitles[titleIndex],
-      level: 'Head',
-      department: departments[deptIndex],
-      joinedDate: `${daysAgo} days ago`,
-      previousCompany: previousCompanies[prevCompIndex],
-      linkedinUrl: `https://linkedin.com/in/${executiveNames[nameIndex].toLowerCase().replace(' ', '-')}`
-    });
-  }
-
-  // Sort by most recent first (lower days ago = more recent)
-  hires.sort((a, b) => {
-    const daysA = parseInt(a.joinedDate);
-    const daysB = parseInt(b.joinedDate);
-    return daysA - daysB;
-  });
-
-  return hires;
 }
 
 export async function POST(request: NextRequest) {
@@ -185,9 +121,60 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     companyName = body.companyName || '';
 
-    // For now, return mock data
-    // In production, this would integrate with LinkedIn API, company databases, etc.
-    const hires = generateMockLeadershipData(companyName);
+    if (!companyName) {
+      return NextResponse.json({ error: 'Company name required' }, { status: 400 });
+    }
+
+    console.log(`Fetching leadership changes for: ${companyName}`);
+
+    // Google News RSS search query - expanded for better coverage
+    const query = encodeURIComponent(`${companyName} joins OR named OR appointed OR promoted OR resigned OR steps down OR welcomes OR hires OR new CEO OR new CFO OR new CTO OR new VP OR new President`);
+    const url = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Google News RSS error: ${response.status}`);
+      return NextResponse.json({
+        hires: [],
+        total: 0
+      });
+    }
+
+    const xml = await response.text();
+    const items = await parseGoogleNewsRSS(xml);
+
+    const hires: LeadershipHire[] = [];
+
+    // Process news items to extract leadership changes
+    for (const item of items.slice(0, 20)) {
+      const execInfo = extractExecutiveInfo(item.title);
+
+      if (execInfo) {
+        // Try to determine department from role
+        let department = 'Executive';
+        if (/tech|CTO|CIO|engineering|information/i.test(execInfo.role)) department = 'Technology';
+        else if (/CFO|finance/i.test(execInfo.role)) department = 'Finance';
+        else if (/CMO|marketing/i.test(execInfo.role)) department = 'Marketing';
+        else if (/COO|operations/i.test(execInfo.role)) department = 'Operations';
+
+        hires.push({
+          name: execInfo.name,
+          title: execInfo.role,
+          level: execInfo.level,
+          department,
+          joinedDate: getDaysAgo(item.pubDate),
+          source: item.source,
+          articleUrl: item.link,
+        });
+      }
+    }
+
+    console.log(`✓ Found ${hires.length} leadership changes for ${companyName}`);
 
     return NextResponse.json({
       hires,
@@ -196,12 +183,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error in leadership-changes API:', error);
 
-    // Return mock data even on error
-    const hires = generateMockLeadershipData(companyName || 'Unknown Company');
-
     return NextResponse.json({
-      hires,
-      total: hires.length
+      hires: [],
+      total: 0
     });
   }
 }

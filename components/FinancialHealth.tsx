@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import SkeletonLoader from './SkeletonLoader';
 
 interface FinancialMetric {
   name: string;
@@ -72,37 +73,45 @@ export default function FinancialHealth({ companyName, metrics }: FinancialHealt
       {/* Collapsed Summary */}
       <div
         onClick={() => setIsModalOpen(true)}
-        className="border border-[var(--border-primary)] rounded-lg p-4 bg-black bg-opacity-40 hover:border-[#007AFF] transition-all cursor-pointer"
+        className="border border-[#222222] rounded-lg p-6 bg-[#111111] hover:bg-[#1A1A1A] transition-all cursor-pointer"
       >
         <div className="flex items-center justify-between gap-4">
           {/* Left: Score & Status */}
           <div>
-            <div className="label-caps opacity-60 mb-1">Financial Health</div>
-            <div className="font-mono-data text-3xl text-white" style={{ letterSpacing: '0.02em' }}>
+            <div className="text-sm font-semibold uppercase tracking-wider text-[#888888] mb-1">Financial Health</div>
+            <div className="text-6xl font-bold text-[#E5E5E5] flex items-center">
               {healthScore}
+              <span className={`ml-2 ${healthScore >= 80 ? 'text-[#30D158]' : 'text-[#FF453A]'}`}>
+                {healthScore >= 80 ? '↑' : '↓'}
+              </span>
             </div>
-            <div className="mt-2 text-xs text-gray-400">
-              Health Score
+            <div className="mt-1 text-xs text-[#888888]">
+              {healthScore >= 80 ? 'Good' : healthScore >= 60 ? 'Fair' : 'Poor'}
             </div>
           </div>
 
           {/* Middle: Status Breakdown */}
           <div className="flex-1">
-            <div className="label-caps opacity-60 mb-2">Status</div>
+            <div className="text-sm font-semibold uppercase tracking-wider text-[#888888] mb-2">Status</div>
             <div className="space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--text-secondary)]">Rating</span>
-                <span className="font-mono font-semibold" style={{ color: statusColor }}>{status}</span>
+                <span className="text-[#888888]">Rating</span>
+                <span className="text-sm font-semibold" style={{ color: statusColor }}>{status}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[var(--text-secondary)]">Metrics</span>
-                <span className="font-mono font-semibold text-white">{displayMetrics.length}</span>
+                <span className="text-[#888888]">Metrics</span>
+                <span className="text-sm font-semibold text-[#E5E5E5]">{displayMetrics.length}</span>
               </div>
             </div>
           </div>
 
-          {/* Right: Expand Icon */}
-          <div className="text-[#007AFF] text-xl">→</div>
+          {/* Right: Expand Icon & Timestamp */}
+          <div className="flex flex-col items-end gap-2">
+            <div className="text-[#007AFF] text-xl">→</div>
+            <div className="text-xs text-[#888888]">
+              Updated 5 mins ago
+            </div>
+          </div>
         </div>
       </div>
 
@@ -119,18 +128,18 @@ export default function FinancialHealth({ companyName, metrics }: FinancialHealt
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="border-b border-[#333333] p-6 flex items-center justify-between">
+            <div className="border-b border-[#222222] p-6 flex items-center justify-between">
               <div>
-                <h3 className="font-ui text-xl font-semibold text-[#E0E0E0]">
+                <h3 className="text-2xl font-bold text-[#E5E5E5]">
                   Financial Audit Trail
                 </h3>
-                <p className="font-ui text-sm text-[var(--text-secondary)] mt-1">
+                <p className="text-sm text-[#888888] mt-2">
                   Comprehensive financial health analysis
                 </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-[var(--text-secondary)] hover:text-[#E0E0E0] text-2xl font-bold"
+                className="text-[#888888] hover:text-[#E5E5E5] text-2xl font-bold"
               >
                 ✕
               </button>
@@ -139,30 +148,30 @@ export default function FinancialHealth({ companyName, metrics }: FinancialHealt
             {/* Modal Body - Financial Metrics Table */}
             <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-6">
               <table className="w-full">
-                <thead className="border-b border-[#333333]">
+                <thead className="border-b border-[#222222]">
                   <tr>
-                    <th className="font-ui text-left py-3 label-caps">Metric</th>
-                    <th className="font-ui text-left py-3 label-caps">Value</th>
-                    <th className="font-ui text-left py-3 label-caps">Status</th>
-                    <th className="font-ui text-left py-3 label-caps">Analysis</th>
+                    <th className="text-left py-3 text-xs uppercase tracking-wider text-[#888888]">Metric</th>
+                    <th className="text-left py-3 text-xs uppercase tracking-wider text-[#888888]">Value</th>
+                    <th className="text-left py-3 text-xs uppercase tracking-wider text-[#888888]">Status</th>
+                    <th className="text-left py-3 text-xs uppercase tracking-wider text-[#888888]">Analysis</th>
                   </tr>
                 </thead>
                 <tbody>
                   {displayMetrics.map((metric, index) => (
                     <tr
                       key={index}
-                      className="border-b border-[#333333] hover:bg-[#007AFF] hover:bg-opacity-5 transition-colors"
+                      className="border-b border-[#222222] hover:bg-[#1A1A1A] transition-colors"
                     >
                       {/* Metric Name */}
                       <td className="py-4">
-                        <div className="font-ui font-semibold text-[#E0E0E0]">
+                        <div className="text-sm font-semibold text-[#E5E5E5]">
                           {metric.name}
                         </div>
                       </td>
 
                       {/* Value */}
                       <td className="py-4">
-                        <div className="font-mono-data text-lg text-[#E0E0E0]" style={{ letterSpacing: '0.02em' }}>
+                        <div className="text-base font-semibold text-[#E5E5E5]">
                           {metric.value}
                         </div>
                       </td>
@@ -170,19 +179,19 @@ export default function FinancialHealth({ companyName, metrics }: FinancialHealt
                       {/* Status */}
                       <td className="py-4">
                         {metric.status === 'success' && (
-                          <span className="font-ui text-sm font-semibold text-[#10b981]">Positive</span>
+                          <span className="text-sm font-semibold text-[#30D158]">Positive</span>
                         )}
                         {metric.status === 'warning' && (
-                          <span className="font-ui text-sm font-semibold text-[#fb923c]">Warning</span>
+                          <span className="text-sm font-semibold text-[#FF9F0A]">Warning</span>
                         )}
                         {metric.status === 'neutral' && (
-                          <span className="font-ui text-sm font-semibold text-[#ef4444]">Negative</span>
+                          <span className="text-sm font-semibold text-[#FF453A]">Negative</span>
                         )}
                       </td>
 
                       {/* Reason */}
                       <td className="py-4">
-                        <div className="font-ui text-sm text-[var(--text-secondary)]">
+                        <div className="text-sm text-[#888888]">
                           {metric.reason}
                         </div>
                       </td>

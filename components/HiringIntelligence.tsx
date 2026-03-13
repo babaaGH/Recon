@@ -1,19 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
 
-interface JobData {
-  department: string;
-  count: number;
-}
-
-interface JobPosition {
+interface HiringSignal {
   title: string;
-  department: string;
-  location: string;
-  postedDate: string;
-  level: string;
+  link: string;
+  source: string;
+  daysAgo: string;
 }
 
 interface HiringIntelligenceProps {
@@ -21,13 +14,12 @@ interface HiringIntelligenceProps {
 }
 
 export default function HiringIntelligence({ companyName }: HiringIntelligenceProps) {
-  const [jobData, setJobData] = useState<JobData[]>([]);
-  const [positions, setPositions] = useState<JobPosition[]>([]);
+  const [signals, setSignals] = useState<HiringSignal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchJobData = async () => {
+    const fetchHiringSignals = async () => {
       setLoading(true);
 
       try {
@@ -39,68 +31,21 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
 
         if (!response.ok) {
           setLoading(false);
+          setSignals([]);
           return;
         }
 
         const data = await response.json();
-
-        // Transform data for chart
-        const chartData: JobData[] = [
-          { department: 'Engineering', count: data.engineering || 0 },
-          { department: 'Sales', count: data.sales || 0 },
-          { department: 'Marketing', count: data.marketing || 0 },
-        ];
-
-        setJobData(chartData);
-
-        // Generate mock positions for detail view
-        const mockPositions: JobPosition[] = [];
-
-        // Engineering positions
-        const engTitles = ['Senior Software Engineer', 'DevOps Engineer', 'Frontend Developer', 'Backend Engineer', 'Tech Lead'];
-        for (let i = 0; i < Math.min(data.engineering || 0, 5); i++) {
-          mockPositions.push({
-            title: engTitles[i % engTitles.length],
-            department: 'Engineering',
-            location: ['Remote', 'San Francisco, CA', 'New York, NY', 'Austin, TX'][i % 4],
-            postedDate: `${Math.floor(Math.random() * 30) + 1} days ago`,
-            level: ['Senior', 'Mid-Level', 'Lead'][i % 3],
-          });
-        }
-
-        // Sales positions
-        const salesTitles = ['Account Executive', 'Sales Manager', 'Business Development Rep', 'Sales Director'];
-        for (let i = 0; i < Math.min(data.sales || 0, 4); i++) {
-          mockPositions.push({
-            title: salesTitles[i % salesTitles.length],
-            department: 'Sales',
-            location: ['Remote', 'Chicago, IL', 'Boston, MA'][i % 3],
-            postedDate: `${Math.floor(Math.random() * 30) + 1} days ago`,
-            level: ['Senior', 'Mid-Level'][i % 2],
-          });
-        }
-
-        // Marketing positions
-        const mktTitles = ['Content Marketing Manager', 'Growth Marketing Lead', 'Digital Marketing Specialist'];
-        for (let i = 0; i < Math.min(data.marketing || 0, 3); i++) {
-          mockPositions.push({
-            title: mktTitles[i % mktTitles.length],
-            department: 'Marketing',
-            location: ['Remote', 'Los Angeles, CA'][i % 2],
-            postedDate: `${Math.floor(Math.random() * 30) + 1} days ago`,
-            level: ['Senior', 'Mid-Level'][i % 2],
-          });
-        }
-
-        setPositions(mockPositions);
-      } catch (err) {
-        console.error('Error fetching hiring intelligence:', err);
+        setSignals(data.signals || []);
+      } catch (error) {
+        console.error('Error fetching hiring signals:', error);
+        setSignals([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchJobData();
+    fetchHiringSignals();
   }, [companyName]);
 
   // Close modal on Esc key
@@ -112,23 +57,12 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
-  const totalJobs = jobData.reduce((sum, item) => sum + item.count, 0);
-
-  // Calculate hiring status
-  const getHiringStatus = () => {
-    if (totalJobs > 50) return { label: 'RAPID GROWTH', color: '#10b981' };
-    if (totalJobs > 20) return { label: 'ACTIVELY HIRING', color: '#3b82f6' };
-    if (totalJobs > 0) return { label: 'HIRING', color: '#f59e0b' };
-    return { label: 'STABLE', color: '#6b7280' };
-  };
-
-  const hiringStatus = getHiringStatus();
-
   if (loading) {
     return (
-      <div className="border border-[var(--border-primary)] rounded-lg p-4 bg-black bg-opacity-40">
-        <div className="label-caps opacity-60 mb-2">Hiring Intelligence</div>
-        <div className="text-sm opacity-60">Loading...</div>
+      <div className="border border-[#222222] rounded-lg p-6 bg-[#111111] animate-pulse">
+        <div className="h-4 bg-[#222222] rounded w-1/3 mb-4"></div>
+        <div className="h-8 bg-[#222222] rounded w-1/2 mb-2"></div>
+        <div className="h-3 bg-[#222222] rounded w-2/3"></div>
       </div>
     );
   }
@@ -138,38 +72,21 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
       {/* Collapsed Summary - Clickable */}
       <div
         onClick={() => setIsModalOpen(true)}
-        className="border border-[var(--border-primary)] rounded-lg p-4 bg-black bg-opacity-40 hover:border-[#007AFF] transition-all cursor-pointer"
+        className="border border-[#222222] rounded-lg p-6 bg-[#111111] hover:bg-[#1A1A1A] transition-all cursor-pointer"
       >
         <div className="flex items-center justify-between gap-4">
-          {/* Left: Score & Status */}
+          {/* Left: Count & Status */}
           <div>
-            <div className="label-caps opacity-60 mb-1">Hiring Activity</div>
-            <div className="font-mono-data text-3xl text-white" style={{ letterSpacing: '0.02em' }}>
-              {totalJobs}
+            <div className="text-sm font-semibold uppercase tracking-wider text-[#888888] mb-1">Hiring Signals</div>
+            <div className="text-6xl font-bold text-[#E5E5E5] flex items-center">
+              {signals.length}
+              {signals.length > 0 && <span className="ml-2 text-[#30D158]">↑</span>}
             </div>
-            <div className="mt-2">
-              <span
-                className="inline-block px-3 py-1 rounded text-xs font-ui font-bold"
-                style={{
-                  backgroundColor: `${hiringStatus.color}20`,
-                  color: hiringStatus.color
-                }}
-              >
-                {hiringStatus.label}
-              </span>
+            <div className="mt-2 text-xs text-[#888888]">
+              {signals.length === 0 ? 'No recent signals' : 'News mentions'}
             </div>
-          </div>
-
-          {/* Middle: 3 Categories */}
-          <div className="flex-1">
-            <div className="label-caps opacity-60 mb-2">By Department</div>
-            <div className="space-y-1">
-              {jobData.map((dept, index) => (
-                <div key={dept.department} className="flex items-center justify-between text-xs">
-                  <span className="text-[var(--text-secondary)]">{dept.department}</span>
-                  <span className="font-mono font-semibold text-white">{dept.count}</span>
-                </div>
-              ))}
+            <div className="text-xs text-[#888888] mt-1">
+              Updated 2 mins ago
             </div>
           </div>
 
@@ -178,7 +95,7 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
         </div>
       </div>
 
-      {/* Modal Overlay - Detailed View */}
+      {/* Modal Overlay */}
       {isModalOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-8"
@@ -187,124 +104,64 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
         >
           {/* Modal Container */}
           <div
-            className="bg-[#000000] border border-[#333333] rounded-lg max-w-5xl w-full max-h-[90vh] overflow-hidden"
+            className="bg-[#000000] border border-[#222222] rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="border-b border-[#333333] p-6 flex items-center justify-between">
+            <div className="border-b border-[#222222] p-6 flex items-center justify-between">
               <div>
-                <h3 className="font-ui text-xl font-semibold text-[#E0E0E0]">
+                <h3 className="text-2xl font-bold text-[#E5E5E5]">
                   Hiring Intelligence
                 </h3>
-                <p className="font-ui text-sm text-[var(--text-secondary)] mt-1">
-                  {companyName} • {totalJobs} Open Positions
+                <p className="text-sm text-[#888888] mt-2">
+                  Latest hiring and recruiting news signals
                 </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-[var(--text-secondary)] hover:text-[#E0E0E0] text-2xl font-bold"
+                className="text-[#888888] hover:text-[#E5E5E5] text-2xl font-bold"
               >
                 ✕
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
-              {/* Summary Stats */}
-              <div className="p-6 border-b border-[#333]">
-                <div className="grid grid-cols-3 gap-4">
-                  {jobData.map((dept, index) => (
-                    <div key={dept.department} className="bg-black bg-opacity-40 rounded-lg p-4 text-center">
-                      <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">
-                        {dept.department}
-                      </div>
-                      <div className="text-3xl font-mono font-bold text-white">
-                        {dept.count}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">positions</div>
-                    </div>
-                  ))}
+            {/* Modal Body - News Signals */}
+            <div className="overflow-y-auto max-h-[calc(90vh-120px)] p-6">
+              {signals.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-sm text-[#888888] mb-2">No recent signals found</div>
+                  <p className="text-xs text-[#888888]">
+                    No hiring or recruiting news found for {companyName}
+                  </p>
                 </div>
-              </div>
-
-              {/* Bar Chart */}
-              <div className="p-6 border-b border-[#333]">
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
-                  Department Distribution
-                </h4>
-                <div className="h-64 bg-black bg-opacity-40 rounded-lg p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={jobData} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
-                      <XAxis
-                        dataKey="department"
-                        tick={{ fill: '#9ca3af', fontSize: 12 }}
-                        axisLine={{ stroke: '#333' }}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        tick={{ fill: '#9ca3af', fontSize: 12 }}
-                        axisLine={{ stroke: '#333' }}
-                        tickLine={false}
-                        width={40}
-                      />
-                      <Bar dataKey="count" radius={[8, 8, 0, 0]}>
-                        {jobData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={['#60a5fa', '#3b82f6', '#2563eb'][index]} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* Job Positions Table */}
-              <div className="p-6">
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
-                  Open Positions ({positions.length})
-                </h4>
-                <div className="space-y-2">
-                  {positions.map((position, index) => (
-                    <div
+              ) : (
+                <div className="space-y-4">
+                  {signals.map((signal, index) => (
+                    <a
                       key={index}
-                      className="border border-[#333] rounded-lg p-4 hover:border-[#007AFF] transition-colors"
+                      href={signal.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block border border-[#222222] rounded-lg p-4 hover:bg-[#1A1A1A] hover:border-[#007AFF] transition-all"
                     >
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3">
+                        <div className="text-[#30D158] text-xl flex-shrink-0 mt-1">📊</div>
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h5 className="font-semibold text-white">{position.title}</h5>
-                            <span
-                              className="px-2 py-0.5 rounded text-xs font-bold uppercase"
-                              style={{
-                                backgroundColor: position.department === 'Engineering' ? '#60a5fa20' : position.department === 'Sales' ? '#3b82f620' : '#2563eb20',
-                                color: position.department === 'Engineering' ? '#60a5fa' : position.department === 'Sales' ? '#3b82f6' : '#2563eb'
-                              }}
-                            >
-                              {position.department}
-                            </span>
-                            <span className="px-2 py-0.5 rounded text-xs bg-gray-500 bg-opacity-20 text-gray-400">
-                              {position.level}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-4 text-xs text-gray-400">
-                            <span>📍 {position.location}</span>
+                          <h4 className="text-sm font-medium text-[#E5E5E5] mb-2 leading-relaxed">
+                            {signal.title}
+                          </h4>
+                          <div className="flex items-center gap-3 text-xs text-[#888888]">
+                            <span>{signal.source}</span>
                             <span>•</span>
-                            <span>Posted {position.postedDate}</span>
+                            <span>{signal.daysAgo}</span>
                           </div>
                         </div>
-                        <button className="px-4 py-2 bg-[#007AFF] text-white text-xs font-bold uppercase tracking-wide rounded hover:bg-[#0066CC] transition-all">
-                          View Details
-                        </button>
+                        <div className="text-[#007AFF] text-sm flex-shrink-0">↗</div>
                       </div>
-                    </div>
+                    </a>
                   ))}
                 </div>
-
-                {positions.length === 0 && (
-                  <div className="text-center py-8 text-gray-500 text-sm">
-                    No positions available
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -312,4 +169,3 @@ export default function HiringIntelligence({ companyName }: HiringIntelligencePr
     </>
   );
 }
-

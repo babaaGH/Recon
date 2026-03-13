@@ -8,9 +8,10 @@ import NewsSentiment from '@/components/NewsSentiment';
 import HiringIntelligence from '@/components/HiringIntelligence';
 import LeadershipChanges from '@/components/LeadershipChanges';
 import NetworkingEvents from '@/components/NetworkingEvents';
-import ExecutiveSocialActivity from '@/components/ExecutiveSocialActivity';
-import CommunityCSR from '@/components/CommunityCSR';
-import StockChart from '@/components/StockChart';
+import NextBestAction from '@/components/NextBestAction';
+import PainSignals from '@/components/PainSignals';
+import TriggerEvents from '@/components/TriggerEvents';
+import KeyContacts from '@/components/KeyContacts';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import IntelligenceLog from '@/components/IntelligenceLog';
 import Image from 'next/image';
@@ -85,58 +86,6 @@ const deriveWebsiteFromCompany = (companyName: string): string => {
   return websiteMap[normalized] || `https://www.${normalized.replace(/\s+/g, '')}.com`;
 };
 
-// Helper function to derive ticker from company name
-const deriveTickerFromCompany = (companyName: string): string => {
-  // Common company ticker mappings
-  const tickerMap: { [key: string]: string } = {
-    'apple': 'AAPL',
-    'microsoft': 'MSFT',
-    'google': 'GOOGL',
-    'alphabet': 'GOOGL',
-    'amazon': 'AMZN',
-    'meta': 'META',
-    'facebook': 'META',
-    'tesla': 'TSLA',
-    'netflix': 'NFLX',
-    'nvidia': 'NVDA',
-    'salesforce': 'CRM',
-    'adobe': 'ADBE',
-    'oracle': 'ORCL',
-    'ibm': 'IBM',
-    'intel': 'INTC',
-    'cisco': 'CSCO',
-    'paypal': 'PYPL',
-    'uber': 'UBER',
-    'airbnb': 'ABNB',
-    'spotify': 'SPOT',
-    'zoom': 'ZM',
-    'shopify': 'SHOP',
-    'square': 'SQ',
-    'block': 'SQ',
-    'stripe': 'STRIPE',
-    'snowflake': 'SNOW',
-    'datadog': 'DDOG',
-    'mongodb': 'MDB',
-    'twilio': 'TWLO',
-    'atlassian': 'TEAM',
-    'servicenow': 'NOW',
-  };
-
-  const normalized = companyName.toLowerCase().replace(/\s+inc\.?$|\s+corp\.?$|\s+corporation$|\s+llc$|\s+ltd\.?$/i, '').trim();
-
-  return tickerMap[normalized] || normalized.substring(0, 4).toUpperCase();
-};
-
-interface StockDataPoint {
-  date: string;
-  timestamp: number;
-  close: number;
-  open: number;
-  high: number;
-  low: number;
-  volume: number;
-}
-
 export default function Home() {
   const [searchResult, setSearchResult] = useState<CompanyIntel | null>(null);
   const [companyName, setCompanyName] = useState('');
@@ -147,11 +96,6 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<BrandfetchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-
-  // Stock data state
-  const [stockData, setStockData] = useState<StockDataPoint[]>([]);
-  const [stockLoading, setStockLoading] = useState(false);
-  const [ticker, setTicker] = useState('');
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -237,62 +181,6 @@ export default function Home() {
     };
 
     loadTargets();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [searchResult]);
-
-  // Fetch stock data when search result is available
-  useEffect(() => {
-    if (!searchResult) {
-      setStockData([]);
-      setTicker('');
-      return;
-    }
-
-    let cancelled = false;
-
-    const loadStockData = async () => {
-      setStockLoading(true);
-
-      // Derive ticker from company name
-      const derivedTicker = deriveTickerFromCompany(searchResult.company_name);
-      setTicker(derivedTicker);
-
-      try {
-        const response = await fetch('/api/stock-price', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ticker: derivedTicker }),
-        });
-
-        if (cancelled) return;
-
-        if (!response.ok) {
-          setStockData([]);
-          return;
-        }
-
-        const data = await response.json();
-        if (!cancelled) {
-          setStockData(data.data || []);
-        }
-      } catch (err) {
-        console.error('Error fetching stock data:', err);
-        if (!cancelled) {
-          setStockData([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setStockLoading(false);
-        }
-      }
-    };
-
-    loadStockData();
 
     return () => {
       cancelled = true;
@@ -394,16 +282,6 @@ export default function Home() {
       const newsData = await newsResponse.json();
       const secData = await secResponse.json();
 
-      // Calculate stock price change
-      let priceChange = '';
-      if (stockData.length > 0) {
-        const firstPrice = stockData[0]?.close || 0;
-        const lastPrice = stockData[stockData.length - 1]?.close || 0;
-        const change = lastPrice - firstPrice;
-        const percentChange = ((change / firstPrice) * 100).toFixed(2);
-        priceChange = `${change >= 0 ? '+' : ''}${percentChange}%`;
-      }
-
       // Prepare data for PDF
       const pdfData = {
         companyName: searchResult.company_name,
@@ -414,9 +292,6 @@ export default function Home() {
         stature: searchResult.stature,
         operationalFocus: searchResult.operational_focus,
         itSignal: searchResult.it_signal,
-        ticker: ticker,
-        stockPrice: stockData.length > 0 ? stockData[stockData.length - 1]?.close : undefined,
-        priceChange: priceChange,
         targets: targets,
         secFilings: secData.filings || [],
         hiringData: {
@@ -527,24 +402,11 @@ export default function Home() {
             {searchResult && (
               <button
                 onClick={handleDownloadPDF}
-                className="flex-shrink-0 px-4 py-2.5 rounded-lg border border-[#007AFF] bg-[#007AFF] bg-opacity-10 text-[#007AFF] hover:bg-opacity-20 transition-all flex items-center gap-2 font-ui text-sm font-semibold"
+                className="flex-shrink-0 px-4 py-2 rounded-lg border border-[#007AFF] bg-[#007AFF] text-white hover:bg-[#0055CC] transition-all flex items-center gap-2 text-sm font-semibold"
                 title="Download Intelligence Report as PDF"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
-                  />
-                </svg>
-                <span className="hidden sm:inline">Download PDF</span>
+                <span>↓</span>
+                <span>Export Report</span>
               </button>
             )}
           </div>
@@ -576,10 +438,10 @@ export default function Home() {
         {searchResult && (
           <div className="h-full flex flex-col">
             {/* 3-Column Bento Grid - Takes Remaining Height */}
-            <div className="flex-1 grid grid-cols-12 gap-6 overflow-hidden">
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 overflow-hidden">
               {/* Column 1: Company Summary (3 cols) */}
-              <div className="col-span-3 flex flex-col overflow-hidden">
-                <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
+              <div className="col-span-1 md:col-span-3 flex flex-col overflow-hidden">
+                <h2 className="text-xl font-bold tracking-widest opacity-90 mb-4 flex-shrink-0">
                   COMPANY INTELLIGENCE
                 </h2>
                 <div className="glass-bento rounded-lg overflow-y-auto flex-1 pr-2"
@@ -593,7 +455,7 @@ export default function Home() {
                       href={deriveWebsiteFromCompany(searchResult.company_name)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xl font-bold hover:text-[#007AFF] transition-colors inline-flex items-center gap-2"
+                      className="text-2xl font-bold hover:text-[#007AFF] transition-colors inline-flex items-center gap-2"
                     >
                       {searchResult.company_name}
                       <span className="text-sm opacity-60">↗</span>
@@ -637,12 +499,19 @@ export default function Home() {
                       {searchResult.it_signal}
                     </div>
                   </div>
+
+                  {/* Pain Signals - New Component */}
+                  <div className="mt-6 px-2">
+                    <ErrorBoundary>
+                      <PainSignals companyName={searchResult.company_name} />
+                    </ErrorBoundary>
+                  </div>
                 </div>
               </div>
 
               {/* Column 2: Financials & Regulatory (6 cols) */}
-              <div className="col-span-6 flex flex-col overflow-hidden">
-                <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
+              <div className="col-span-1 md:col-span-6 flex flex-col overflow-hidden">
+                <h2 className="text-xl font-bold tracking-widest opacity-90 mb-4 flex-shrink-0">
                   FINANCIAL & REGULATORY
                 </h2>
                 <div className="space-y-6 flex-1 overflow-y-auto pr-2"
@@ -661,12 +530,7 @@ export default function Home() {
                   </ErrorBoundary>
                 </div>
 
-                {/* Row 2: Stock Performance */}
-                <ErrorBoundary>
-                  <StockChart ticker={ticker} data={stockData} loading={stockLoading} />
-                </ErrorBoundary>
-
-                {/* Row 3: SEC Filings */}
+                {/* Row 2: SEC Filings */}
                 <div className="glass-bento rounded-lg overflow-hidden">
                   <div className="p-6">
                     <ErrorBoundary>
@@ -674,12 +538,17 @@ export default function Home() {
                     </ErrorBoundary>
                   </div>
                 </div>
+
+                {/* Row 3: Trigger Events - New Component */}
+                <ErrorBoundary>
+                  <TriggerEvents companyName={searchResult.company_name} />
+                </ErrorBoundary>
               </div>
             </div>
 
               {/* Column 3: People & Networking (3 cols) */}
-              <div className="col-span-3 flex flex-col overflow-hidden">
-                <h2 className="text-lg font-medium opacity-90 mb-4 flex-shrink-0">
+              <div className="col-span-1 md:col-span-3 flex flex-col overflow-hidden">
+                <h2 className="text-xl font-bold tracking-widest opacity-90 mb-4 flex-shrink-0">
                   PEOPLE & NETWORKING
                 </h2>
                 <div className="space-y-4 flex-1 overflow-y-auto pr-2"
@@ -687,6 +556,16 @@ export default function Home() {
                      scrollbarWidth: 'thin',
                      scrollbarColor: 'rgba(99, 102, 241, 0.3) transparent'
                    }}>
+                {/* Next Best Action - Moved to top (highest value) */}
+                <ErrorBoundary>
+                  <NextBestAction companyName={searchResult.company_name} />
+                </ErrorBoundary>
+
+                {/* Key Contacts - New Component */}
+                <ErrorBoundary>
+                  <KeyContacts />
+                </ErrorBoundary>
+
                 {/* Leadership Changes */}
                 <ErrorBoundary>
                   <LeadershipChanges companyName={searchResult.company_name} />
@@ -700,16 +579,6 @@ export default function Home() {
                 {/* Hiring Intelligence */}
                 <ErrorBoundary>
                   <HiringIntelligence companyName={searchResult.company_name} />
-                </ErrorBoundary>
-
-                {/* Executive Social Activity */}
-                <ErrorBoundary>
-                  <ExecutiveSocialActivity companyName={searchResult.company_name} />
-                </ErrorBoundary>
-
-                {/* Community & CSR */}
-                <ErrorBoundary>
-                  <CommunityCSR companyName={searchResult.company_name} />
                 </ErrorBoundary>
               </div>
             </div>

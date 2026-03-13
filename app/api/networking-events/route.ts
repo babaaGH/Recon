@@ -7,258 +7,147 @@ interface Event {
   location: string;
   role: 'Sponsor' | 'Attendee' | 'Speaker' | 'Exhibitor' | 'Host';
   description?: string;
+  source?: string;
+  url?: string;
 }
 
-interface EventbriteEvent {
-  name: {
-    text: string;
-  };
-  description: {
-    text: string;
-  };
-  start: {
-    local: string;
-  };
-  venue?: {
-    address: {
-      city?: string;
-      region?: string;
-      country?: string;
-    };
-  };
-  online_event: boolean;
-  category?: {
-    name: string;
-  };
+// Parse Google News RSS XML
+async function parseGoogleNewsRSS(xml: string): Promise<any[]> {
+  const items: any[] = [];
+
+  // Extract items using regex (simple XML parsing)
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let match;
+
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const itemContent = match[1];
+
+    // Extract title (with or without CDATA)
+    const titleCDataMatch = /<title><!\[CDATA\[(.*?)\]\]><\/title>/.exec(itemContent);
+    const titlePlainMatch = /<title>(.*?)<\/title>/.exec(itemContent);
+    const title = titleCDataMatch ? titleCDataMatch[1] : (titlePlainMatch ? titlePlainMatch[1] : '');
+
+    // Extract link
+    const linkMatch = /<link>(.*?)<\/link>/.exec(itemContent);
+    const link = linkMatch ? linkMatch[1] : '';
+
+    // Extract pubDate
+    const pubDateMatch = /<pubDate>(.*?)<\/pubDate>/.exec(itemContent);
+    const pubDate = pubDateMatch ? pubDateMatch[1] : '';
+
+    // Extract source
+    const sourceMatch = /<source.*?>(.*?)<\/source>/.exec(itemContent);
+    const source = sourceMatch ? sourceMatch[1] : '';
+
+    items.push({ title, link, pubDate, source });
+  }
+
+  return items;
 }
 
-interface EventbriteResponse {
-  events: EventbriteEvent[];
-  pagination: {
-    object_count: number;
-  };
-}
+// Extract event information from news title
+function extractEventInfo(title: string): Pick<Event, 'name' | 'type' | 'role' | 'date' | 'location'> | null {
+  const titleLower = title.toLowerCase();
 
-// Generate realistic mock networking events data
-function generateMockEventsData(companyName: string): Event[] {
-  const seed = companyName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-  const conferences = [
-    'AWS re:Invent 2026',
-    'Salesforce Dreamforce',
-    'Microsoft Ignite',
-    'Google Cloud Next',
-    'TechCrunch Disrupt',
-    'Web Summit',
-    'CES 2026',
-    'MWC Barcelona',
-    'SXSW Interactive',
-    'Money20/20',
-    'FinTech Festival Singapore',
-    'Collision Conference'
-  ];
-
-  const tradeShows = [
-    'SaaS Connect Expo',
-    'Enterprise Tech Summit',
-    'Digital Transformation World',
-    'AI & Big Data Expo',
-    'Cloud Expo Europe'
-  ];
-
-  const roundtables = [
-    'CIO Executive Roundtable',
-    'Digital Innovation Forum',
-    'Tech Leadership Summit',
-    'Enterprise Security Roundtable',
-    'Future of Work Discussion'
-  ];
-
-  const webinars = [
-    'Digital Transformation Best Practices',
-    'Scaling Enterprise SaaS',
-    'Modern Data Architecture',
-    'AI in Business Operations',
-    'Cybersecurity Trends 2026'
-  ];
-
-  const locations = [
-    'Las Vegas, NV',
-    'San Francisco, CA',
-    'New York, NY',
-    'Austin, TX',
-    'Seattle, WA',
-    'London, UK',
-    'Singapore',
-    'Barcelona, Spain',
-    'Boston, MA',
-    'Chicago, IL',
-    'Virtual Event',
-    'Hybrid Event'
-  ];
-
-  const events: Event[] = [];
-
-  // Generate 2-3 conference events
-  const confCount = 2 + (seed % 2);
-  for (let i = 0; i < confCount; i++) {
-    const confIndex = (seed + i * 7) % conferences.length;
-    const locIndex = (seed + i * 5) % locations.length;
-    const daysFromNow = 30 + ((seed + i * 13) % 120);
-    const eventDate = new Date();
-    eventDate.setDate(eventDate.getDate() + daysFromNow);
-
-    events.push({
-      name: conferences[confIndex],
-      type: 'Conference',
-      date: eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      location: locations[locIndex],
-      role: i % 3 === 0 ? 'Sponsor' : i % 3 === 1 ? 'Speaker' : 'Attendee',
-      description: i % 2 === 0 ? `${companyName} will showcase latest innovations and network with industry leaders.` : undefined
-    });
-  }
-
-  // Generate 1-2 sponsorships
-  const sponsorCount = 1 + (seed % 2);
-  for (let i = 0; i < sponsorCount; i++) {
-    const confIndex = (seed + i * 11 + 100) % conferences.length;
-    const locIndex = (seed + i * 9) % locations.length;
-    const daysFromNow = 20 + ((seed + i * 17) % 90);
-    const eventDate = new Date();
-    eventDate.setDate(eventDate.getDate() + daysFromNow);
-
-    events.push({
-      name: conferences[confIndex],
-      type: 'Sponsorship',
-      date: eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      location: locations[locIndex],
-      role: 'Sponsor',
-      description: `${companyName} is a platinum sponsor for this premier industry event.`
-    });
-  }
-
-  // Generate 1-2 speaking engagements
-  const speakingCount = 1 + (seed % 2);
-  for (let i = 0; i < speakingCount; i++) {
-    const confIndex = (seed + i * 13 + 200) % conferences.length;
-    const locIndex = (seed + i * 11) % locations.length;
-    const daysFromNow = 15 + ((seed + i * 19) % 80);
-    const eventDate = new Date();
-    eventDate.setDate(eventDate.getDate() + daysFromNow);
-
-    events.push({
-      name: conferences[confIndex],
-      type: 'Speaking',
-      date: eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      location: locations[locIndex],
-      role: 'Speaker',
-      description: `${companyName} executives will present on industry trends and innovations.`
-    });
-  }
-
-  // Generate 1-2 trade shows
-  const tradeCount = 1 + (seed % 2);
-  for (let i = 0; i < tradeCount; i++) {
-    const tradeIndex = (seed + i * 17) % tradeShows.length;
-    const locIndex = (seed + i * 13) % locations.length;
-    const daysFromNow = 40 + ((seed + i * 23) % 100);
-    const eventDate = new Date();
-    eventDate.setDate(eventDate.getDate() + daysFromNow);
-
-    events.push({
-      name: tradeShows[tradeIndex],
-      type: 'Trade Show',
-      date: eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      location: locations[locIndex],
-      role: 'Exhibitor'
-    });
-  }
-
-  // Generate 1 roundtable
-  const roundtableIndex = seed % roundtables.length;
-  const locIndex = (seed * 7) % locations.length;
-  const daysFromNow = 10 + (seed % 60);
-  const eventDate = new Date();
-  eventDate.setDate(eventDate.getDate() + daysFromNow);
-
-  events.push({
-    name: roundtables[roundtableIndex],
-    type: 'Roundtable',
-    date: eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    location: locations[locIndex],
-    role: 'Host',
-    description: `Exclusive invitation-only event for senior technology leaders.`
-  });
-
-  // Generate 1-2 webinars
-  const webinarCount = 1 + (seed % 2);
-  for (let i = 0; i < webinarCount; i++) {
-    const webinarIndex = (seed + i * 19) % webinars.length;
-    const daysFromNow = 5 + ((seed + i * 29) % 50);
-    const eventDate = new Date();
-    eventDate.setDate(eventDate.getDate() + daysFromNow);
-
-    events.push({
-      name: webinars[webinarIndex],
-      type: 'Webinar',
-      date: eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      location: 'Virtual Event',
-      role: 'Host'
-    });
-  }
-
-  // Sort by date (soonest first)
-  events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  return events;
-}
-
-// Helper function to categorize Eventbrite events into our event types
-function categorizeEventbriteEvent(event: EventbriteEvent): Pick<Event, 'type' | 'role'> {
-  const name = (event.name?.text || '').toLowerCase();
-  const description = (event.description?.text || '').toLowerCase();
-  const category = (event.category?.name || '').toLowerCase();
-
-  // Determine event type
+  // Look for event patterns
+  let eventName = '';
   let type: Event['type'] = 'Conference';
-  if (
-    category.includes('seminar') ||
-    category.includes('webinar') ||
-    name.includes('webinar') ||
-    event.online_event
-  ) {
-    type = 'Webinar';
-  } else if (
-    name.includes('trade show') ||
-    name.includes('expo') ||
-    category.includes('trade')
-  ) {
-    type = 'Trade Show';
-  } else if (
-    name.includes('roundtable') ||
-    name.includes('panel') ||
-    category.includes('networking')
-  ) {
-    type = 'Roundtable';
-  } else if (description.includes('speaking') || name.includes('speaker')) {
-    type = 'Speaking';
-  } else if (description.includes('sponsor') || name.includes('sponsor')) {
-    type = 'Sponsorship';
+  let role: Event['role'] = 'Attendee';
+
+  // Extract event name (usually before hyphen or colon)
+  const eventPatterns = [
+    /(?:at|speaking at|presenting at)\s+([A-Z][^-:|]+(?:Conference|Summit|Expo|Forum|Event|Show))/i,
+    /(Money20\/20|Fintech|Banking|Finance|Tech|Cloud|Security|DevOps|Web Summit|SXSW|CES|MWC)[\s\w]*(?:Conference|Summit|Expo|Forum|Event|Show)/i,
+  ];
+
+  for (const pattern of eventPatterns) {
+    const match = title.match(pattern);
+    if (match) {
+      eventName = match[1] || match[0];
+      break;
+    }
   }
 
-  // Determine role (simplified)
-  let role: Event['role'] = 'Attendee';
-  if (description.includes('sponsor')) {
-    role = 'Sponsor';
-  } else if (description.includes('speaking') || description.includes('speaker')) {
+  // If no event name found, check for generic event indicators
+  if (!eventName) {
+    if (/conference/i.test(title)) {
+      const confMatch = title.match(/([A-Z][^-:|]+Conference)/i);
+      if (confMatch) eventName = confMatch[1];
+    } else if (/summit/i.test(title)) {
+      const summitMatch = title.match(/([A-Z][^-:|]+Summit)/i);
+      if (summitMatch) eventName = summitMatch[1];
+    } else if (/expo/i.test(title)) {
+      const expoMatch = title.match(/([A-Z][^-:|]+Expo)/i);
+      if (expoMatch) eventName = expoMatch[1];
+    }
+  }
+
+  if (!eventName) return null;
+
+  // Determine type
+  if (/expo|trade show/i.test(titleLower)) {
+    type = 'Trade Show';
+  } else if (/webinar/i.test(titleLower)) {
+    type = 'Webinar';
+  } else if (/summit/i.test(titleLower)) {
+    type = 'Conference';
+  } else if (/roundtable|panel/i.test(titleLower)) {
+    type = 'Roundtable';
+  }
+
+  // Determine role
+  if (/speaking|speaker|keynote/i.test(titleLower)) {
     role = 'Speaker';
-  } else if (description.includes('exhibitor') || description.includes('booth')) {
+  } else if (/sponsor/i.test(titleLower)) {
+    role = 'Sponsor';
+  } else if (/exhibitor|exhibiting/i.test(titleLower)) {
     role = 'Exhibitor';
-  } else if (description.includes('host')) {
+  } else if (/host/i.test(titleLower)) {
     role = 'Host';
   }
 
-  return { type, role };
+  // Extract date (look for month + year or specific dates)
+  let date = '';
+  const datePatterns = [
+    /(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:-\d{1,2})?,?\s+202[5-6]/i,
+    /\d{1,2}\/\d{1,2}\/202[5-6]/,
+    /202[5-6]/,
+  ];
+
+  for (const pattern of datePatterns) {
+    const match = title.match(pattern);
+    if (match) {
+      date = match[0];
+      break;
+    }
+  }
+
+  // Extract location
+  let location = 'TBA';
+  const locationPatterns = [
+    /(?:in|at)\s+(Las Vegas|San Francisco|New York|Austin|Seattle|London|Singapore|Barcelona|Boston|Chicago|Miami|Dubai)/i,
+    /(Las Vegas|San Francisco|New York|Austin|Seattle|London|Singapore|Barcelona|Boston|Chicago|Miami|Dubai)/i,
+  ];
+
+  for (const pattern of locationPatterns) {
+    const match = title.match(pattern);
+    if (match) {
+      location = match[1];
+      break;
+    }
+  }
+
+  if (/virtual|online|webinar/i.test(titleLower)) {
+    location = 'Virtual Event';
+  }
+
+  return {
+    name: eventName.trim(),
+    type,
+    role,
+    date: date || 'TBA',
+    location,
+  };
 }
 
 export async function POST(request: NextRequest) {
@@ -268,86 +157,50 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     companyName = body.companyName || '';
 
-    const EVENTBRITE_API_KEY = process.env.EVENTBRITE_API_KEY;
-
-    if (!EVENTBRITE_API_KEY) {
-      console.log('Eventbrite API key not configured, returning mock data');
-      const events = generateMockEventsData(companyName);
-      return NextResponse.json({
-        events,
-        total: events.length
-      });
+    if (!companyName) {
+      return NextResponse.json({ error: 'Company name required' }, { status: 400 });
     }
 
-    console.log(`Fetching events for: ${companyName}`);
+    console.log(`Fetching networking events for: ${companyName}`);
 
-    // Eventbrite API endpoint for event search
-    const url = `https://www.eventbriteapi.com/v3/events/search/?q=${encodeURIComponent(companyName)}&token=${EVENTBRITE_API_KEY}&expand=venue,category`;
+    // Google News RSS search query
+    const query = encodeURIComponent(`${companyName} conference OR speaking OR summit OR expo 2026`);
+    const url = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
 
     const response = await fetch(url, {
-      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
     });
 
     if (!response.ok) {
-      console.error(`Eventbrite API error: ${response.status} ${response.statusText}`);
-      // Return mock data as fallback
-      const events = generateMockEventsData(companyName);
+      console.error(`Google News RSS error: ${response.status}`);
       return NextResponse.json({
-        events,
-        total: events.length
+        events: [],
+        total: 0
       });
     }
 
-    const data: EventbriteResponse = await response.json();
+    const xml = await response.text();
+    const items = await parseGoogleNewsRSS(xml);
 
-    // Transform Eventbrite events to our format
     const events: Event[] = [];
 
-    if (data.events && Array.isArray(data.events)) {
-      data.events.forEach((ebEvent: EventbriteEvent) => {
-        const { type, role } = categorizeEventbriteEvent(ebEvent);
+    // Process news items to extract event information
+    for (const item of items.slice(0, 20)) {
+      const eventInfo = extractEventInfo(item.title);
 
-        // Format location
-        let location = 'Virtual Event';
-        if (!ebEvent.online_event && ebEvent.venue?.address) {
-          const addr = ebEvent.venue.address;
-          const parts = [addr.city, addr.region, addr.country].filter(Boolean);
-          location = parts.join(', ') || 'TBA';
-        }
-
-        // Format date
-        const eventDate = new Date(ebEvent.start.local);
-        const formattedDate = eventDate.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
-
+      if (eventInfo) {
         events.push({
-          name: ebEvent.name?.text || 'Untitled Event',
-          type,
-          date: formattedDate,
-          location,
-          role,
-          description: ebEvent.description?.text?.substring(0, 150) || undefined
+          ...eventInfo,
+          description: item.title,
+          source: item.source,
+          url: item.link,
         });
-      });
+      }
     }
 
-    // If no real events found, fallback to mock data
-    if (events.length === 0) {
-      console.log('No Eventbrite events found, returning mock data');
-      const mockEvents = generateMockEventsData(companyName);
-      return NextResponse.json({
-        events: mockEvents,
-        total: mockEvents.length
-      });
-    }
-
-    console.log(`✓ Found ${events.length} events from Eventbrite for ${companyName}`);
+    console.log(`✓ Found ${events.length} networking events for ${companyName}`);
 
     return NextResponse.json({
       events,
@@ -356,12 +209,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error in networking-events API:', error);
 
-    // Return mock data even on error
-    const events = generateMockEventsData(companyName || 'Unknown Company');
-
     return NextResponse.json({
-      events,
-      total: events.length
+      events: [],
+      total: 0
     });
   }
 }
